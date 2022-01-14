@@ -13,6 +13,8 @@ import org.javacord.api.audio.AudioConnection
 import org.javacord.api.entity.channel.TextChannel
 import org.javacord.api.entity.server.Server
 import org.slf4j.LoggerFactory
+import java.net.MalformedURLException
+import java.net.URL
 import java.util.*
 
 object AudioUtil {
@@ -40,7 +42,7 @@ object AudioUtil {
     }
 
     fun setupTimeout(server: Server) {
-        Timer().schedule(object: TimerTask() {
+        Timer().schedule(object : TimerTask() {
             override fun run() {
                 if (playerMap[server.id]?.playingTrack == null) {
                     disconnect(server)
@@ -50,14 +52,22 @@ object AudioUtil {
         }, PropertiesUtil.get(PropertiesUtil.AFK_TIMEOUT).toLong())
     }
 
-    fun playSong(server: Server, url: String, textChannel: TextChannel, immediate: Boolean) {
+    fun playSong(server: Server, identifier: String, textChannel: TextChannel, immediate: Boolean) {
         val player = playerMap[server.id]!!
         val scheduler = schedulerMap[server.id] ?: TrackScheduler(player, textChannel).apply {
             schedulerMap[server.id] = this
             player.addListener(this)
         }
 
-        playerManager.loadItem(url, object : AudioLoadResultHandler {
+        //If we've got a valid URL, try to load it. Otherwise, do a youtube search
+        val identifierToUse = try {
+            URL(identifier)
+            identifier
+        } catch (e: MalformedURLException) {
+            "ytsearch:${identifier}"
+        }
+
+        playerManager.loadItem(identifierToUse, object : AudioLoadResultHandler {
             override fun trackLoaded(track: AudioTrack) {
                 if (immediate) {
                     scheduler.playImmediate(track)
@@ -67,10 +77,7 @@ object AudioUtil {
             }
 
             override fun playlistLoaded(playlist: AudioPlaylist) {
-                for (track in playlist.tracks) {
-                    scheduler.addToQueue(track)
-                }
-                scheduler.playNextInQueue()
+                scheduler.addToQueue(playlist.tracks.first())
             }
 
             override fun noMatches() {
