@@ -26,8 +26,6 @@ object Commands {
                 Info.PAUSE -> PauseCommand(messageEvent).execute()
 
                 Info.STOP -> StopCommand(messageEvent).execute()
-
-                else -> messageEvent.channel.sendMessage("Not yet implemented")
             }
         }
     }

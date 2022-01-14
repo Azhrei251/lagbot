@@ -1,5 +1,6 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.4.10'
+    id "com.github.johnrengelman.shadow" version "7.1.2"
 }
 
 task run(type: JavaExec) {
@@ -7,8 +8,10 @@ task run(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
+ext.versionName = "0.1"
+
 group 'com.azhapps.lagbot'
-version '0.1'
+version project.versionName
 
 repositories {
     mavenCentral()
@@ -24,4 +27,16 @@ dependencies {
 
     runtimeOnly 'org.apache.logging.log4j:log4j-to-slf4j:2.17.0'
     runtimeOnly 'ch.qos.logback:logback-classic:1.2.3'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.azhapps.lagbot.Main'
+    }
+}
+
+shadowJar {
+    baseName = 'lagbot'
+    classifier = null
+    version = project.versionName
 }
