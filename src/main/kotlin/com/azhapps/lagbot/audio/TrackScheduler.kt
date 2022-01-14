@@ -8,11 +8,11 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason
 import org.javacord.api.entity.channel.TextChannel
 import java.util.*
-import java.util.concurrent.LinkedBlockingQueue
+import kotlin.collections.ArrayDeque
 
 class TrackScheduler(private val player: AudioPlayer, private val textChannel: TextChannel) : AudioEventAdapter() {
 
-    private val queue: Queue<AudioTrack> = LinkedBlockingQueue()
+    private val queue: ArrayDeque<AudioTrack> = ArrayDeque()
 
     fun addToQueue(audioTrack: AudioTrack) {
         if (!player.isPaused && player.playingTrack == null) {
@@ -27,9 +27,13 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
         player.playTrack(audioTrack)
     }
 
-    fun playNextInQueue() {
+    fun playNext(audioTrack: AudioTrack) {
+        queue.addFirst(audioTrack)
+    }
+
+    private fun playNextInQueue() {
         if (!queue.isEmpty()) {
-            player.playTrack(queue.poll())
+            player.playTrack(queue.removeFirst())
         } else {
             AudioUtil.setupTimeout(textChannel.asServerTextChannel().get().server)
         }

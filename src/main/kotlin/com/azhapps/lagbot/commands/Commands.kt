@@ -13,6 +13,8 @@ object Commands {
 
                 Info.PLAY_NEXT -> PlayNextCommand(messageEvent).execute()
 
+                Info.PLAY_NOW -> PlayNowCommand(messageEvent).execute()
+
                 Info.HELP -> HelpCommand(messageEvent).execute()
 
                 Info.SKIP -> SkipCommand(messageEvent).execute()
@@ -42,8 +44,9 @@ object Commands {
 
     enum class Info(val keys: List<String>, val helpText: String) {
         HELP(listOf("help", "h"), "${PREFIX}help: Provides a list of commands and their uses"),
-        PLAY(listOf("play", "p"), "${PREFIX}play: {identifier}: Immediately plays the requested song"),
-        PLAY_NEXT(listOf("playnext", "pn"), "${PREFIX}playnext: {identifier}: Adds the requested song to the queue"),
+        PLAY(listOf("play", "p"), "${PREFIX}play {identifier}: Adds the requested song to the end of the queue"),
+        PLAY_NEXT(listOf("playnext", "pn"), "${PREFIX}playnext {identifier}: Adds the requested song to the front of the queue"),
+        PLAY_NOW(listOf("playnow"), "${PREFIX}playnow {identifier}: Immediately plays the requested song"),
         STOP(listOf("stop", "s"), "${PREFIX}stop: Stops the music playback and clears the queue"),
         PAUSE(listOf("pause", "p"), "${PREFIX}pause: Pauses the music playback"),
         RESUME(listOf("resume", "r"), "${PREFIX}resume: Resumes the music playback"),

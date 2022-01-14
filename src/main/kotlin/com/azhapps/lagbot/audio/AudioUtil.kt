@@ -52,7 +52,7 @@ object AudioUtil {
         }, PropertiesUtil.get(PropertiesUtil.AFK_TIMEOUT).toLong())
     }
 
-    fun playSong(server: Server, identifier: String, textChannel: TextChannel, immediate: Boolean) {
+    fun playSong(server: Server, identifier: String, textChannel: TextChannel, playTime: PlayTime) {
         val player = playerMap[server.id]!!
         val scheduler = schedulerMap[server.id] ?: TrackScheduler(player, textChannel).apply {
             schedulerMap[server.id] = this
@@ -69,10 +69,10 @@ object AudioUtil {
 
         playerManager.loadItem(identifierToUse, object : AudioLoadResultHandler {
             override fun trackLoaded(track: AudioTrack) {
-                if (immediate) {
-                    scheduler.playImmediate(track)
-                } else {
-                    scheduler.addToQueue(track)
+                when (playTime) {
+                    PlayTime.IMMEDIATE -> scheduler.playImmediate(track)
+                    PlayTime.NEXT -> scheduler.playNext(track)
+                    PlayTime.QUEUED -> scheduler.addToQueue(track)
                 }
             }
 
@@ -92,4 +92,8 @@ object AudioUtil {
     }
 
     fun getScheduler(server: Server) = schedulerMap[server.id]
+
+    enum class PlayTime {
+        QUEUED, IMMEDIATE, NEXT
+    }
 }

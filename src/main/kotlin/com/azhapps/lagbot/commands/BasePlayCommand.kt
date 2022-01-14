@@ -6,7 +6,7 @@ import org.javacord.api.event.message.MessageCreateEvent
 
 abstract class BasePlayCommand(messageEvent: MessageCreateEvent) : BaseCommand(messageEvent) {
 
-    abstract val immediate: Boolean
+    abstract val playTime: AudioUtil.PlayTime
 
     override fun execute() {
         val botInVoice = Main.isConnectedToVoice(event)
@@ -14,12 +14,12 @@ abstract class BasePlayCommand(messageEvent: MessageCreateEvent) : BaseCommand(m
         if (requesterInVoice) {
             val songRequest = event.messageContent.substringAfter(' ').substringBefore("?playlist")
             if (botInVoice) {
-                AudioUtil.playSong(event.server.get(), songRequest, event.channel, immediate)
+                AudioUtil.playSong(event.server.get(), songRequest, event.channel, playTime)
 
             } else {
                 event.messageAuthor.connectedVoiceChannel.get().connect().thenAccept {
                     AudioUtil.connect(event.server.get(), it)
-                    AudioUtil.playSong(event.server.get(), songRequest, event.channel, immediate)
+                    AudioUtil.playSong(event.server.get(), songRequest, event.channel, playTime)
                 }.whenComplete { _, t ->
                     t.printStackTrace()
                     event.channel.sendMessage("Something went wrong: ${t.message}")
