@@ -28,6 +28,8 @@ object Commands {
                 Info.PAUSE -> PauseCommand(messageEvent).execute()
 
                 Info.STOP -> StopCommand(messageEvent).execute()
+
+                Info.REMOVE -> RemoveCommand(messageEvent).execute()
             }
         }
     }
@@ -53,5 +55,6 @@ object Commands {
         QUEUE(listOf("queue", "q"), "${PREFIX}queue: Displays the current queue"),
         SKIP(listOf("skip"), "${PREFIX}skip: Skips the currently playing song"),
         CLEAR(listOf("clear"), "${PREFIX}clear: Clears the queue"),
+        REMOVE(listOf("remove"), "${PREFIX}remove {index}: Removes the song at the given index"),
     }
 }

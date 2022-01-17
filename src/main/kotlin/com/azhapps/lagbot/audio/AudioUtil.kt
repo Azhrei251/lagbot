@@ -78,21 +78,26 @@ object AudioUtil {
 
         playerManager.loadItem(identifierToUse, object : AudioLoadResultHandler {
             override fun trackLoaded(track: AudioTrack) {
-                when (playTime) {
+                val message = when (playTime) {
                     PlayTime.IMMEDIATE -> scheduler.playImmediate(track)
                     PlayTime.NEXT -> scheduler.playNext(track)
                     PlayTime.QUEUED -> scheduler.addToQueue(track)
                 }
+                textChannel.sendMessage(message)
             }
 
             override fun playlistLoaded(playlist: AudioPlaylist) {
                 //Search results are returned as a playlist oddly. Only add the first. Otherwise add the whole playlist
                 if (isSearch) {
-                    scheduler.addToQueue(playlist.tracks.first())
+                    textChannel.sendMessage(scheduler.addToQueue(playlist.tracks.first()))
+
                 } else {
+                    var message = "```"
                     for (track in playlist.tracks) {
-                        scheduler.addToQueue(track)
+                       message += "${scheduler.addToQueue(track)}\n"
                     }
+                    message += "```"
+                    textChannel.sendMessage(message)
                 }
             }
 

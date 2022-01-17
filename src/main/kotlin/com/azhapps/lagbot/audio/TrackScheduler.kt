@@ -7,27 +7,31 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason
 import org.javacord.api.entity.channel.TextChannel
-import kotlin.collections.ArrayDeque
 
 class TrackScheduler(private val player: AudioPlayer, private val textChannel: TextChannel) : AudioEventAdapter() {
 
     private val queue: ArrayDeque<AudioTrack> = ArrayDeque()
 
-    fun addToQueue(audioTrack: AudioTrack) {
+    fun addToQueue(audioTrack: AudioTrack): String {
         if (!player.isPaused && player.playingTrack == null) {
             player.playTrack(audioTrack)
         } else {
             queue.add(audioTrack)
-            textChannel.sendMessage("Added ${audioTrack.info.title} to queue at position ${queue.size}")
         }
+        return getTrackQueueInfo(audioTrack)
     }
 
-    fun playImmediate(audioTrack: AudioTrack) {
+    private fun getTrackQueueInfo(audioTrack: AudioTrack) =
+        "Added ${audioTrack.info.title} to queue at position ${queue.size}"
+
+    fun playImmediate(audioTrack: AudioTrack): String {
         player.playTrack(audioTrack)
+        return getTrackQueueInfo(audioTrack)
     }
 
-    fun playNext(audioTrack: AudioTrack) {
+    fun playNext(audioTrack: AudioTrack): String {
         queue.addFirst(audioTrack)
+        return getTrackQueueInfo(audioTrack)
     }
 
     private fun playNextInQueue() {
@@ -79,6 +83,13 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
 
     fun clear() {
         queue.clear()
+    }
+
+    fun remove(index: Int) = if (index < queue.size) {
+        queue.removeAt(index)
+        true
+    } else {
+        false
     }
 
     override fun onPlayerPause(player: AudioPlayer) {
