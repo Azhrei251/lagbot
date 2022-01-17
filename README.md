@@ -1,6 +1,6 @@
 A simple discord music bot written in Kotlin using Javacord and LavaPlayer.
 
-To use, update ```discord.token``` in the properties file with your bot token and it to your server.
+To use, update ```discord.token``` in the properties file with your bot token and add the bot to your server.
 
 Useful commands:
 
