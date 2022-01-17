@@ -22,7 +22,7 @@ abstract class BasePlayCommand(messageEvent: MessageCreateEvent) : BaseCommand(m
                     AudioUtil.playSong(event.server.get(), songRequest, event.channel, playTime)
                 }.whenComplete { _, t ->
                     t.printStackTrace()
-                    event.channel.sendMessage("Something went wrong: ${t.message}")
+                    event.channel.sendMessage("Something went wrong:\n${t.message}")
                 }
             }
 

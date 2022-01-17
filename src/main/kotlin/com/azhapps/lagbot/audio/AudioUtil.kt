@@ -60,10 +60,12 @@ object AudioUtil {
         }
 
         //If we've got a valid URL, try to load it. Otherwise, do a youtube search
+        var isSearch = false
         val identifierToUse = try {
             URL(identifier)
             identifier
         } catch (e: MalformedURLException) {
+            isSearch = true
             "ytsearch:${identifier}"
         }
 
@@ -77,7 +79,14 @@ object AudioUtil {
             }
 
             override fun playlistLoaded(playlist: AudioPlaylist) {
-                scheduler.addToQueue(playlist.tracks.first())
+                //Search results are returned as a playlist oddly. Only add the first. Otherwise add the whole playlist
+                if (isSearch) {
+                    scheduler.addToQueue(playlist.tracks.first())
+                } else {
+                    for (track in playlist.tracks) {
+                        scheduler.addToQueue(track)
+                    }
+                }
             }
 
             override fun noMatches() {
