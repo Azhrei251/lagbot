@@ -32,6 +32,7 @@ object AudioUtil {
             registerSourceManager(BandcampAudioSourceManager())
             registerSourceManager(VimeoAudioSourceManager())
             registerSourceManager(TwitchStreamAudioSourceManager())
+            registerSourceManager(SoundCloudAudioSourceManager.Builder().build())
         }
     }
 
@@ -83,7 +84,9 @@ object AudioUtil {
                     PlayTime.NEXT -> scheduler.playNext(track)
                     PlayTime.QUEUED -> scheduler.addToQueue(track)
                 }
-                textChannel.sendMessage(message)
+                if (message != null) {
+                    textChannel.sendMessage(message)
+                }
             }
 
             override fun playlistLoaded(playlist: AudioPlaylist) {

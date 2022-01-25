@@ -12,21 +12,21 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
 
     private val queue: ArrayDeque<AudioTrack> = ArrayDeque()
 
-    fun addToQueue(audioTrack: AudioTrack): String {
+    fun addToQueue(audioTrack: AudioTrack): String? =
         if (!player.isPaused && player.playingTrack == null) {
             player.playTrack(audioTrack)
+            null
         } else {
             queue.add(audioTrack)
+            getTrackQueueInfo(audioTrack)
         }
-        return getTrackQueueInfo(audioTrack)
-    }
 
     private fun getTrackQueueInfo(audioTrack: AudioTrack) =
         "Added ${audioTrack.info.title} to queue at position ${queue.size}"
 
-    fun playImmediate(audioTrack: AudioTrack): String {
+    fun playImmediate(audioTrack: AudioTrack): String? {
         player.playTrack(audioTrack)
-        return getTrackQueueInfo(audioTrack)
+        return null
     }
 
     fun playNext(audioTrack: AudioTrack): String {
