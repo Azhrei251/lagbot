@@ -1,5 +1,6 @@
 package com.azhapps.lagbot.audio
 
+import com.azhapps.lagbot.utils.Utils
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayer
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter
@@ -11,6 +12,8 @@ import org.javacord.api.entity.channel.TextChannel
 class TrackScheduler(private val player: AudioPlayer, private val textChannel: TextChannel) : AudioEventAdapter() {
 
     private val queue: ArrayDeque<AudioTrack> = ArrayDeque()
+
+    fun queueSize() = queue.size
 
     fun addToQueue(audioTrack: AudioTrack): String? =
         if (!player.isPaused && player.playingTrack == null) {
@@ -52,8 +55,10 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
 
     fun printQueue() {
         var messageText = "```"
+        var queueDuration = 0L
         if (player.playingTrack != null) {
             messageText += "Currently playing: ${player.playingTrack.info.title}\n\n"
+            queueDuration = player.playingTrack.duration - player.playingTrack.position
         }
 
         if (queue.isEmpty()) {
@@ -61,9 +66,11 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
 
         } else {
             queue.forEachIndexed { i, it ->
-                messageText += "${i + 1}: ${it.info.title}\n"
+                queueDuration += it.duration
+                messageText += "${i + 1}: ${it.info.title} | ${Utils.formatTimeStamp(it.duration)}\n"
             }
         }
+        messageText += "\nQueue duration: ${Utils.formatTimeStamp(queueDuration)}"
         messageText += "```"
         textChannel.sendMessage(messageText)
     }
