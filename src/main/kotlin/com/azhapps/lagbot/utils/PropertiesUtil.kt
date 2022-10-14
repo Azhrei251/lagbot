@@ -24,6 +24,7 @@ object PropertiesUtil {
     }
 
     fun get(key: String): String =
-        System.getenv(key) ?: localProperties.getProperty(key, defaultProperties.getProperty(key))
+        System.getenv(toEnvVarKey(key)) ?: localProperties.getProperty(key, defaultProperties.getProperty(key))
 
+    private fun toEnvVarKey(key: String) = key.uppercase().replace(".", "_")
 }
