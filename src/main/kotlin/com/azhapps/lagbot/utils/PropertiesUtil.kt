@@ -24,6 +24,6 @@ object PropertiesUtil {
     }
 
     fun get(key: String): String =
-        System.getProperty(key) ?: localProperties.getProperty(key, defaultProperties.getProperty(key))
+        System.getenv(key) ?: localProperties.getProperty(key, defaultProperties.getProperty(key))
 
 }
