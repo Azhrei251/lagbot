@@ -14,11 +14,16 @@ object PropertiesUtil {
         }
     }
     private val localProperties by lazy {
-        Properties().apply {
-            load(FileInputStream("local.properties"))
+        try {
+            Properties().apply {
+                load(FileInputStream("local.properties"))
+            }
+        } catch (t: Throwable) {
+            defaultProperties
         }
     }
 
-    fun get(key: String): String = localProperties.getProperty(key, defaultProperties.getProperty(key))
+    fun get(key: String): String =
+        System.getProperty(key) ?: localProperties.getProperty(key, defaultProperties.getProperty(key))
 
 }
