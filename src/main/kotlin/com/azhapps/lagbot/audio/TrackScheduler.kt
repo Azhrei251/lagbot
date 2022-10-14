@@ -68,7 +68,7 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
             queue.forEachIndexed { i, it ->
                 queueDuration += it.duration
                 messageText += "${i + 1}: ${it.info.title} | ${Utils.formatTimeStamp(it.duration)}\n"
-          L  }
+            }
         }
         messageText += "\nQueue duration: ${Utils.formatTimeStamp(queueDuration)}"
         messageText += "```"
