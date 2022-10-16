@@ -1,3 +1,5 @@
+![workflow](https://github.com/azhrei251/lagbot/actions/workflows/docker-image.yml/badge.svg)
+
 A simple discord music bot written in Kotlin using Javacord and LavaPlayer.
 
 To use, update ```discord.token``` in the properties file with your bot token and add the bot to your server.
