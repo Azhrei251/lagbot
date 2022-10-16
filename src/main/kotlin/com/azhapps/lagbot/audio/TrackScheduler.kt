@@ -24,8 +24,8 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
             getTrackQueueInfo(audioTrack)
         }
 
-    private fun getTrackQueueInfo(audioTrack: AudioTrack) =
-        "Added ${audioTrack.info.title} to queue at position ${queue.size}"
+    private fun getTrackQueueInfo(audioTrack: AudioTrack, position: Int = queue.size) =
+        "Added ${audioTrack.info.title} to queue at position $position"
 
     fun playImmediate(audioTrack: AudioTrack): String? {
         player.playTrack(audioTrack)
@@ -34,7 +34,7 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
 
     fun playNext(audioTrack: AudioTrack): String {
         queue.addFirst(audioTrack)
-        return getTrackQueueInfo(audioTrack)
+        return getTrackQueueInfo(audioTrack, 1)
     }
 
     private fun playNextInQueue() {

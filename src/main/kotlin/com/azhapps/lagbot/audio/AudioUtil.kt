@@ -79,25 +79,18 @@ object AudioUtil {
 
         playerManager.loadItem(identifierToUse, object : AudioLoadResultHandler {
             override fun trackLoaded(track: AudioTrack) {
-                val message = when (playTime) {
-                    PlayTime.IMMEDIATE -> scheduler.playImmediate(track)
-                    PlayTime.NEXT -> scheduler.playNext(track)
-                    PlayTime.QUEUED -> scheduler.addToQueue(track)
-                }
-                if (message != null) {
-                    textChannel.sendMessage(message)
-                }
+                addIndividualTrack(track, playTime, scheduler)
             }
 
             override fun playlistLoaded(playlist: AudioPlaylist) {
                 //Search results are returned as a playlist oddly. Only add the first. Otherwise add the whole playlist
                 if (isSearch) {
-                    textChannel.sendMessage(scheduler.addToQueue(playlist.tracks.first()))
+                    textChannel.sendMessage(addIndividualTrack(playlist.tracks.first(), playTime, scheduler))
 
                 } else {
                     var message = "```"
                     for (track in playlist.tracks) {
-                       message += "${scheduler.addToQueue(track)}\n"
+                       message += "${addIndividualTrack(track, playTime, scheduler)}\n"
                     }
                     message += "```"
                     textChannel.sendMessage(message)
@@ -113,6 +106,19 @@ object AudioUtil {
             }
 
         })
+    }
+
+    private fun addIndividualTrack(
+        track: AudioTrack,
+        playTime: PlayTime,
+        scheduler: TrackScheduler,
+    ): String {
+        val message = when (playTime) {
+            PlayTime.IMMEDIATE -> scheduler.playImmediate(track)
+            PlayTime.NEXT -> scheduler.playNext(track)
+            PlayTime.QUEUED -> scheduler.addToQueue(track)
+        }
+        return message ?: ""
     }
 
     fun getScheduler(server: Server) = schedulerMap[server.id]
