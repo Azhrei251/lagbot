@@ -22,6 +22,7 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
             null
         } else {
             queue.add(audioTrack)
+            updateLoopIfRequired(audioTrack)
             getTrackQueueInfo(audioTrack)
         }
 
@@ -30,11 +31,13 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
 
     fun playImmediate(audioTrack: AudioTrack): String? {
         player.playTrack(audioTrack)
+        updateLoopIfRequired(audioTrack)
         return null
     }
 
     fun playNext(audioTrack: AudioTrack): String {
         queue.addFirst(audioTrack)
+        updateLoopIfRequired(audioTrack)
         return getTrackQueueInfo(audioTrack, 1)
     }
 
@@ -120,6 +123,12 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
 
     fun stopLoop() {
         loopQueue.clear()
+    }
+
+    private fun updateLoopIfRequired(audioTrack: AudioTrack) {
+        if (loopQueue.isNotEmpty()) {
+            loopQueue.add(audioTrack)
+        }
     }
 
     override fun onPlayerPause(player: AudioPlayer) {
