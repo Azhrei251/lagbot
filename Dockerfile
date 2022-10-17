@@ -1,4 +1,4 @@
-FROM amazoncorretto:17-alpine3.16
+FROM amazoncorretto:17-alpine
 COPY . /app
 WORKDIR /app
 RUN ./gradlew --no-daemon shadowJar

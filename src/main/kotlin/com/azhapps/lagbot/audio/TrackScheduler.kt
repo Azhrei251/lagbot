@@ -12,6 +12,7 @@ import org.javacord.api.entity.channel.TextChannel
 class TrackScheduler(private val player: AudioPlayer, private val textChannel: TextChannel) : AudioEventAdapter() {
 
     private val queue: ArrayDeque<AudioTrack> = ArrayDeque()
+    private val loopQueue: ArrayDeque<AudioTrack> = ArrayDeque()
 
     fun queueSize() = queue.size
 
@@ -41,12 +42,19 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
         if (!queue.isEmpty()) {
             player.playTrack(queue.removeFirst())
         } else {
-            AudioUtil.setupTimeout(textChannel.asServerTextChannel().get().server)
+            if (loopQueue.isNotEmpty()) {
+                queue.addAll(loopQueue.map {
+                    it.makeClone()
+                })
+                player.playTrack(queue.removeFirst())
+            } else {
+                AudioUtil.setupTimeout(textChannel.asServerTextChannel().get().server)
+            }
         }
     }
 
     fun skip() {
-        if (queue.isEmpty()) {
+        if (queue.isEmpty() && loopQueue.isEmpty()) {
             player.stopTrack()
         } else {
             playNextInQueue()
@@ -97,6 +105,15 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
         true
     } else {
         false
+    }
+
+    fun loop(): Int {
+        loopQueue.clear()
+        player.playingTrack?.let {
+            loopQueue.add(it)
+        }
+        loopQueue.addAll(queue)
+        return loopQueue.size
     }
 
     override fun onPlayerPause(player: AudioPlayer) {
