@@ -58,6 +58,6 @@ object Commands {
         SKIP(listOf("skip"), "${PREFIX}skip: Skips the currently playing song"),
         CLEAR(listOf("clear"), "${PREFIX}clear: Clears the queue"),
         REMOVE(listOf("remove"), "${PREFIX}remove {index}: Removes the song at the given index"),
-        LOOP(listOf("loop", "l"), "${PREFIX}loop {index}: Repeats the current queue"),
+        LOOP(listOf("loop", "l"), "${PREFIX}loop: Repeats the current queue... repeatedly"),
     }
 }
