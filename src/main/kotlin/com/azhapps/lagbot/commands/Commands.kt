@@ -34,6 +34,8 @@ object Commands {
                 Info.LOOP -> LoopCommand(messageEvent).execute()
 
                 Info.STOP_LOOP -> LoopStopCommand(messageEvent).execute()
+
+                Info.ISSUE -> CreateIssueCommand(messageEvent).execute()
             }
         }
     }
@@ -62,5 +64,6 @@ object Commands {
         REMOVE(listOf("remove"), "${PREFIX}remove {index}: Removes the song at the given index"),
         LOOP(listOf("loop", "l"), "${PREFIX}loop: Repeats the current queue... repeatedly"),
         STOP_LOOP(listOf("stoploop"), "${PREFIX}stoploop: Stop looping"),
+        ISSUE(listOf("issue"), "${PREFIX}issue {title}: Create a new issue on github"),
     }
 }

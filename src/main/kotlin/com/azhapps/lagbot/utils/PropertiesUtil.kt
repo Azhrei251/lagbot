@@ -7,6 +7,7 @@ object PropertiesUtil {
 
     const val DISCORD_TOKEN = "discord.token"
     const val AFK_TIMEOUT = "afk.timeout"
+    const val GITHUB_TOKEN = "github.token"
 
     private val defaultProperties by lazy {
         Properties().apply {
