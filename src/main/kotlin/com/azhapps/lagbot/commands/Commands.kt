@@ -32,6 +32,8 @@ object Commands {
                 Info.REMOVE -> RemoveCommand(messageEvent).execute()
 
                 Info.LOOP -> LoopCommand(messageEvent).execute()
+
+                Info.STOP_LOOP -> LoopStopCommand(messageEvent).execute()
             }
         }
     }
@@ -59,5 +61,6 @@ object Commands {
         CLEAR(listOf("clear"), "${PREFIX}clear: Clears the queue"),
         REMOVE(listOf("remove"), "${PREFIX}remove {index}: Removes the song at the given index"),
         LOOP(listOf("loop", "l"), "${PREFIX}loop: Repeats the current queue... repeatedly"),
+        STOP_LOOP(listOf("stoploop"), "${PREFIX}stoploop: Stop looping"),
     }
 }

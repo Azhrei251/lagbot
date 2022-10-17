@@ -94,10 +94,12 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
     fun stop() {
         player.stopTrack()
         queue.clear()
+        loopQueue.clear()
     }
 
     fun clear() {
         queue.clear()
+        loopQueue.clear()
     }
 
     fun remove(index: Int) = if (index < queue.size) {
@@ -114,6 +116,10 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
         }
         loopQueue.addAll(queue)
         return loopQueue.size
+    }
+
+    fun stopLoop() {
+        loopQueue.clear()
     }
 
     override fun onPlayerPause(player: AudioPlayer) {
