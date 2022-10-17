@@ -7,7 +7,7 @@ class CreateIssueCommand(messageEvent: MessageCreateEvent) : BaseCommand(message
     override fun execute() {
         val decomposed = event.messageContent.split(' ')
 
-        GithubRepository.createIssue(decomposed[1], "Created by lagbot") {
+        GithubRepository.createIssue(decomposed[1], "Created by lagbot. Requesting user: ${event.messageAuthor.discriminatedName} | ${event.messageAuthor.displayName}") {
             event.channel.sendMessage(it)
         }
     }
