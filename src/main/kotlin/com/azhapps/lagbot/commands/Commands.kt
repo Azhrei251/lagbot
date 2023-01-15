@@ -45,7 +45,7 @@ object Commands {
 
         return Info.values().firstOrNull { info ->
             info.keys.any {
-                matchString == "$PREFIX${it}"
+                matchString.equals("$PREFIX${it}", ignoreCase = true)
             }
         }
     }
