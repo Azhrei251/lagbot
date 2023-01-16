@@ -3,6 +3,10 @@ package com.azhapps.lagbot
 import com.azhapps.lagbot.audio.AudioUtil
 import com.azhapps.lagbot.commands.Commands
 import com.azhapps.lagbot.utils.PropertiesUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.newFixedThreadPoolContext
+import kotlinx.coroutines.newSingleThreadContext
 import org.javacord.api.DiscordApi
 import org.javacord.api.DiscordApiBuilder
 import org.javacord.api.event.message.MessageEvent
@@ -11,6 +15,11 @@ import org.slf4j.LoggerFactory
 object Main {
 
     lateinit var api: DiscordApi
+
+    val scope by lazy {
+        CoroutineScope(newFixedThreadPoolContext(4, "API"))
+    }
+
     private val logger = LoggerFactory.getLogger(Main::class.java)
 
     fun isConnectedToVoice(event: MessageEvent) = event.server.get().getConnectedVoiceChannel(api.yourself).isPresent

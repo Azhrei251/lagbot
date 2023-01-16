@@ -1,6 +1,7 @@
 package com.azhapps.lagbot.audio
 
 import com.azhapps.lagbot.Main
+import com.azhapps.lagbot.utils.Patterns
 import com.azhapps.lagbot.utils.PropertiesUtil
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer
@@ -17,9 +18,8 @@ import org.javacord.api.audio.AudioConnection
 import org.javacord.api.entity.channel.TextChannel
 import org.javacord.api.entity.server.Server
 import org.slf4j.LoggerFactory
-import java.net.MalformedURLException
-import java.net.URL
 import java.util.*
+import java.util.regex.Pattern
 
 object AudioUtil {
     private val logger = LoggerFactory.getLogger(AudioUtil::class.java)
@@ -35,6 +35,15 @@ object AudioUtil {
             registerSourceManager(SoundCloudAudioSourceManager.Builder().build())
         }
     }
+    private val EMAIL_ADDRESS: Pattern = Pattern.compile(
+        "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +
+                "\\@" +
+                "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
+                "(" +
+                "\\." +
+                "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
+                ")+"
+    )
 
     fun connect(server: Server, audioConnection: AudioConnection) {
         val player = playerMap[server.id] ?: playerManager.createPlayer().apply {
@@ -69,10 +78,9 @@ object AudioUtil {
 
         //If we've got a valid URL, try to load it. Otherwise, do a youtube search
         var isSearch = false
-        val identifierToUse = try {
-            URL(identifier)
+        val identifierToUse = if (Patterns.WEB_URL.matcher(identifier).matches()) {
             identifier
-        } catch (e: MalformedURLException) {
+        } else {
             isSearch = true
             "ytsearch:${identifier}"
         }
@@ -90,7 +98,7 @@ object AudioUtil {
                 } else {
                     var message = "```"
                     for (track in playlist.tracks) {
-                       message += "${addIndividualTrack(track, playTime, scheduler)}\n"
+                        message += "${addIndividualTrack(track, playTime, scheduler)}\n"
                     }
                     message += "```"
                     textChannel.sendMessage(message)

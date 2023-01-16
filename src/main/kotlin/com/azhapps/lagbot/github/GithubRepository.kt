@@ -1,19 +1,19 @@
 package com.azhapps.lagbot.github
 
+import com.azhapps.lagbot.Main.scope
 import com.azhapps.lagbot.github.model.CreateIssueRequest
+import com.azhapps.lagbot.utils.NetworkUtils
 import com.azhapps.lagbot.utils.PropertiesUtil
 import com.azhapps.lagbot.utils.PropertiesUtil.GITHUB_TOKEN
-import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 object GithubRepository {
     private const val GITHUB_API_BASE_URL = "https://api.github.com/"
     private val retrofit = Retrofit.Builder()
         .baseUrl(GITHUB_API_BASE_URL)
-        .addConverterFactory(GsonConverterFactory.create())
+        .addConverterFactory(NetworkUtils.converterFactory)
         .client(OkHttpClient.Builder()
             .addInterceptor {
                 val request = it.request().newBuilder()
@@ -23,16 +23,10 @@ object GithubRepository {
 
                 it.proceed(request)
             }
-            .addInterceptor(HttpLoggingInterceptor().apply {
-                setLevel(HttpLoggingInterceptor.Level.BODY)
-            })
+            .addInterceptor(NetworkUtils.loggingInterceptor)
             .build())
         .build()
     private val githubDataSource = retrofit.create(GithubDataSource::class.java)
-
-    private val scope by lazy {
-        CoroutineScope(newSingleThreadContext("API"))
-    }
 
     fun createIssue(title: String, body: String, sendResponse: (String) -> Unit) {
         scope.launch {

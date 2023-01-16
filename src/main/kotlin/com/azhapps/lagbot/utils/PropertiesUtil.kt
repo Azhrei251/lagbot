@@ -8,6 +8,9 @@ object PropertiesUtil {
     const val DISCORD_TOKEN = "discord.token"
     const val AFK_TIMEOUT = "afk.timeout"
     const val GITHUB_TOKEN = "github.token"
+    const val SPOTIFY_CLIENT_ID = "spotify.client.id"
+    const val SPOTIFY_CLIENT_SECRET = "spotify.client.secret"
+    const val DEBUG = "debug"
 
     private val defaultProperties by lazy {
         Properties().apply {

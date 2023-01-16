@@ -2,6 +2,8 @@ package com.azhapps.lagbot.commands
 
 import com.azhapps.lagbot.Main
 import com.azhapps.lagbot.audio.AudioUtil
+import com.azhapps.lagbot.spotify.SpotifyRepository
+import kotlinx.coroutines.launch
 import org.javacord.api.event.message.MessageCreateEvent
 
 abstract class BasePlayCommand(messageEvent: MessageCreateEvent) : BaseCommand(messageEvent) {
@@ -14,7 +16,15 @@ abstract class BasePlayCommand(messageEvent: MessageCreateEvent) : BaseCommand(m
         if (requesterInVoice) {
             val songRequest = event.messageContent.substringAfter(' ').substringBefore("?playlist")
             if (botInVoice) {
-                AudioUtil.playSong(event.server.get(), songRequest, event.channel, playTime)
+                if (songRequest.contains("open.spotify.com")) {
+                    Main.scope.launch {
+                        SpotifyRepository.getSearchTerms(songRequest).forEach {
+                            AudioUtil.playSong(event.server.get(), it, event.channel, playTime)
+                        }
+                    }
+                } else {
+                    AudioUtil.playSong(event.server.get(), songRequest, event.channel, playTime)
+                }
 
             } else {
                 event.messageAuthor.connectedVoiceChannel.get().connect().thenAccept {
