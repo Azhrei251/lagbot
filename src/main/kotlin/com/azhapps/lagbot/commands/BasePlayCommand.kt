@@ -35,12 +35,19 @@ abstract class BasePlayCommand(messageEvent: MessageCreateEvent) : BaseCommand(m
     private fun playOrLookupSong(songRequest: String) {
         if (songRequest.contains("open.spotify.com")) {
             Main.scope.launch {
-                SpotifyRepository.getSearchTerms(songRequest).forEach {
-                    AudioUtil.playSong(event.server.get(), it, event.channel, playTime)
+                SpotifyRepository.getSearchTerms(songRequest).run {
+                    forEach {
+                        AudioUtil.playSong(event.server.get(), it, event.channel, playTime) {
+                            //Do nothing
+                        }
+                    }
+                    event.channel.sendMessage("${this.size} tracks added to queue")
                 }
             }
         } else {
-            AudioUtil.playSong(event.server.get(), songRequest, event.channel, playTime)
+            AudioUtil.playSong(event.server.get(), songRequest, event.channel, playTime) {
+                event.channel.sendMessage(it)
+            }
         }
     }
 }

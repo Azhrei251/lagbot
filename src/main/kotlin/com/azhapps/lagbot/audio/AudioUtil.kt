@@ -60,7 +60,13 @@ object AudioUtil {
         }, PropertiesUtil.get(PropertiesUtil.AFK_TIMEOUT).toLong())
     }
 
-    fun playSong(server: Server, identifier: String, textChannel: TextChannel, playTime: PlayTime) {
+    fun playSong(
+        server: Server,
+        identifier: String,
+        textChannel: TextChannel,
+        playTime: PlayTime,
+        onTrackAdded: (String) -> Unit,
+    ) {
         val player = playerMap[server.id]!!
         val scheduler = schedulerMap[server.id] ?: TrackScheduler(player, textChannel).apply {
             schedulerMap[server.id] = this
@@ -84,15 +90,10 @@ object AudioUtil {
             override fun playlistLoaded(playlist: AudioPlaylist) {
                 //Search results are returned as a playlist oddly. Only add the first. Otherwise add the whole playlist
                 if (isSearch) {
-                    textChannel.sendMessage(addIndividualTrack(playlist.tracks.first(), playTime, scheduler))
+                    onTrackAdded(addIndividualTrack(playlist.tracks.first(), playTime, scheduler))
 
                 } else {
-                    var message = "```"
-                    for (track in playlist.tracks) {
-                        message += "${addIndividualTrack(track, playTime, scheduler)}\n"
-                    }
-                    message += "```"
-                    textChannel.sendMessage(message)
+                    onTrackAdded("${playlist.tracks.size} tracks added to queue")
                 }
             }
 
