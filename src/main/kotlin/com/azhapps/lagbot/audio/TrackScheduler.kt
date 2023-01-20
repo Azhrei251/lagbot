@@ -9,6 +9,8 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason
 import org.javacord.api.entity.channel.TextChannel
 
+private const val MAX_MESSAGE_SIZE = 1750
+
 class TrackScheduler(private val player: AudioPlayer, private val textChannel: TextChannel) : AudioEventAdapter() {
 
     private val queue: ArrayDeque<AudioTrack> = ArrayDeque()
@@ -76,9 +78,22 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
             messageText += "Queue empty"
 
         } else {
+            var excessSongs = 0
+
             queue.forEachIndexed { i, it ->
+                val nextMessage = "${i + 1}: ${it.info.title} | ${Utils.formatTimeStamp(it.duration)}\n"
+
                 queueDuration += it.duration
-                messageText += "${i + 1}: ${it.info.title} | ${Utils.formatTimeStamp(it.duration)}\n"
+
+                if (messageText.length + nextMessage.length > MAX_MESSAGE_SIZE) {
+                    excessSongs++
+                } else {
+                    messageText += nextMessage
+                }
+            }
+
+            if (excessSongs > 0) {
+                messageText += "\n$excessSongs more songs...\n"
             }
         }
         messageText += "\nQueue duration: ${Utils.formatTimeStamp(queueDuration)}"
