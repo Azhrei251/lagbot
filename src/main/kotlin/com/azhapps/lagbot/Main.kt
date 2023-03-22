@@ -4,11 +4,10 @@ import com.azhapps.lagbot.audio.AudioUtil
 import com.azhapps.lagbot.commands.Commands
 import com.azhapps.lagbot.utils.PropertiesUtil
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.newFixedThreadPoolContext
-import kotlinx.coroutines.newSingleThreadContext
 import org.javacord.api.DiscordApi
 import org.javacord.api.DiscordApiBuilder
+import org.javacord.api.entity.intent.Intent
 import org.javacord.api.event.message.MessageEvent
 import org.slf4j.LoggerFactory
 
@@ -28,7 +27,9 @@ object Main {
     fun main(args: Array<String>) {
         api = DiscordApiBuilder()
             .setToken(PropertiesUtil.get(PropertiesUtil.DISCORD_TOKEN))
-            .login().join()
+            .setAllNonPrivilegedIntentsAnd(Intent.MESSAGE_CONTENT)
+            .login()
+            .join()
 
         logger.info("Lagbot loaded")
 
