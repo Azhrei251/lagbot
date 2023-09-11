@@ -41,7 +41,7 @@ jar {
 }
 
 shadowJar {
-    baseName = 'lagbot'
-    classifier = null
-    version = project.versionName
+    archiveBaseName.set('lagbot')
+    archiveClassifier.set('')
+    archiveVersion.set(project.versionName)
 }
