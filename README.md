@@ -2,8 +2,21 @@
 
 A simple discord music bot written in Kotlin using Javacord and LavaPlayer.
 
-To use, update ```discord.token``` in the properties file with your bot token and add the bot to your server.
+To run locally, update ```discord.token``` in the properties file with your bot token and add the bot to your server.
 
+<h4>Docker Compose</h4>
+```
+  lagbot:
+    image: azhrei251/lagbot:latest
+    environment:
+      DISCORD_TOKEN: YOUR_TOKEN_HERE
+      AFK_TIMEOUT: 600000
+      GITHUB_TOKEN: YOUR_TOKEN_HERE
+      SPOTIFY_CLIENT_ID: YOUR_CLIENT_ID_HERE
+      SPOTIFY_CLIENT_SECRET: YOUR_CLIENT_SECRET_HERE
+      DEBUG: false
+    restart: unless-stopped
+```  
 <h4>Codebase commands</h4>
 
 ```gradlew run```: Run the bot locally
