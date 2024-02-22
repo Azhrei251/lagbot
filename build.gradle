@@ -34,7 +34,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.8.0"
 
-    runtimeOnly 'org.apache.logging.log4j:log4j-to-slf4j:2.22.1'
+    runtimeOnly 'org.apache.logging.log4j:log4j-to-slf4j:2.23.0'
     runtimeOnly 'ch.qos.logback:logback-classic:1.5.0'
 }
 
