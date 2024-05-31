@@ -4,14 +4,14 @@ import com.azhapps.lagbot.Main
 import com.azhapps.lagbot.audio.AudioUtil
 import com.azhapps.lagbot.spotify.SpotifyRepository
 import kotlinx.coroutines.launch
-import org.javacord.api.event.message.MessageCreateEvent
+import dev.kord.core.event.message.MessageCreateEvent
 
 abstract class BasePlayCommand(messageEvent: MessageCreateEvent) : BaseCommand(messageEvent) {
 
     abstract val playTime: AudioUtil.PlayTime
 
-    override fun execute() {
-        val botInVoice = Main.isConnectedToVoice(event)
+    override suspend fun execute() {
+       /* val botInVoice = Main.isConnectedToVoice(event)
         val requesterInVoice = event.messageAuthor.connectedVoiceChannel.isPresent
         if (requesterInVoice) {
             val songRequest = event.messageContent.substringAfter(' ').substringBefore("?playlist")
@@ -23,17 +23,17 @@ abstract class BasePlayCommand(messageEvent: MessageCreateEvent) : BaseCommand(m
                     playOrLookupSong(songRequest)
                 }.whenComplete { _, t ->
                     t.printStackTrace()
-                    event.channel.sendMessage("Something went wrong:\n${t.message}")
+                    event.message.channel.createMessage("Something went wrong:\n${t.message}")
                 }
             }
 
         } else {
-            event.channel.sendMessage("Join a voice channel first!")
-        }
+            event.message.channel.createMessage("Join a voice channel first!")
+        }*/
     }
 
     private fun playOrLookupSong(songRequest: String) {
-        if (songRequest.contains("open.spotify.com")) {
+       /*if (songRequest.contains("open.spotify.com")) {
             Main.scope.launch {
                 SpotifyRepository.getSearchTerms(songRequest).run {
                     forEach {
@@ -41,13 +41,13 @@ abstract class BasePlayCommand(messageEvent: MessageCreateEvent) : BaseCommand(m
                             //Do nothing
                         }
                     }
-                    event.channel.sendMessage("${this.size} tracks added to queue")
+                    event.message.channel.createMessage("${this.size} tracks added to queue")
                 }
             }
         } else {
             AudioUtil.playSong(event.server.get(), songRequest, event.channel, playTime) {
-                event.channel.sendMessage(it)
+                event.message.channel.createMessage(it)
             }
-        }
+        }*/
     }
 }

@@ -1,20 +1,20 @@
 package com.azhapps.lagbot.commands
 
 import com.azhapps.lagbot.audio.AudioUtil
-import org.javacord.api.event.message.MessageCreateEvent
+import dev.kord.core.event.message.MessageCreateEvent
 
 class LoopCommand(event: MessageCreateEvent): BaseCommand(event) {
 
-    override fun execute() {
-        val scheduler = AudioUtil.getScheduler(event.server.get())
+    override suspend fun execute() {
+        val scheduler = null//AudioUtil.getScheduler(event.server.get())
         if (scheduler == null) {
-            event.channel.sendMessage("Nothing in queue!")
+            event.message.channel.createMessage("Nothing in queue!")
         } else {
-            val looped = scheduler.loop()
+            val looped = 0//scheduler.loop()
             if (looped == 0) {
-                event.channel.sendMessage("Nothing to loop!")
+                event.message.channel.createMessage("Nothing to loop!")
             } else {
-                event.channel.sendMessage("Setup loop for $looped songs")
+                event.message.channel.createMessage("Setup loop for $looped songs")
             }
         }
     }

@@ -7,7 +7,7 @@ import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason
-import org.javacord.api.entity.channel.TextChannel
+import dev.kord.core.entity.channel.TextChannel
 
 private const val MAX_MESSAGE_SIZE = 1750
 
@@ -53,7 +53,7 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
                 })
                 player.playTrack(queue.removeFirst())
             } else {
-                AudioUtil.setupTimeout(textChannel.asServerTextChannel().get().server)
+               // AudioUtil.setupTimeout(textChannel.asServerTextChannel().get().server)
             }
         }
     }
@@ -98,7 +98,7 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
         }
         messageText += "\nQueue duration: ${Utils.formatTimeStamp(queueDuration)}"
         messageText += "```"
-        textChannel.sendMessage(messageText)
+       // textChannel.sendMessage(messageText)
     }
 
     fun pause() {
@@ -147,7 +147,7 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
     }
 
     override fun onPlayerPause(player: AudioPlayer) {
-        AudioUtil.setupTimeout(textChannel.asServerTextChannel().get().server)
+        //AudioUtil.setupTimeout(textChannel.asServerTextChannel().get().server)
     }
 
     override fun onPlayerResume(player: AudioPlayer) {
@@ -157,14 +157,14 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
     }
 
     override fun onTrackStart(player: AudioPlayer, track: AudioTrack) {
-        textChannel.sendMessage("Playing: ${track.info?.title}")
+        //textChannel.sendMessage("Playing: ${track.info?.title}")
     }
 
     override fun onTrackEnd(player: AudioPlayer, track: AudioTrack, endReason: AudioTrackEndReason) {
         if (endReason.mayStartNext) {
             playNextInQueue()
         } else {
-            AudioUtil.setupTimeout(textChannel.asServerTextChannel().get().server)
+           // AudioUtil.setupTimeout(textChannel.asServerTextChannel().get().server)
         }
 
         // endReason == FINISHED: A track finished or died by an exception (mayStartNext = true).

@@ -1,13 +1,13 @@
 package com.azhapps.lagbot.commands
 
-import org.javacord.api.event.message.MessageCreateEvent
+import dev.kord.core.event.message.MessageCreateEvent
 
 object Commands {
 
     private const val PREFIX = "!"
 
-    fun handle(messageEvent: MessageCreateEvent) {
-        get(messageEvent.messageContent)?.let { info ->
+    suspend fun handle(messageEvent: MessageCreateEvent) {
+        get(messageEvent.message.content)?.let { info ->
             when (info) {
                 Info.PLAY -> PlayCommand(messageEvent).execute()
 
@@ -53,7 +53,10 @@ object Commands {
     enum class Info(val keys: List<String>, val helpText: String) {
         HELP(listOf("help", "h"), "${PREFIX}help: Provides a list of commands and their uses"),
         PLAY(listOf("play", "p"), "${PREFIX}play {identifier}: Adds the requested song to the end of the queue"),
-        PLAY_NEXT(listOf("playnext", "pn"), "${PREFIX}playnext {identifier}: Adds the requested song to the front of the queue"),
+        PLAY_NEXT(
+            listOf("playnext", "pn"),
+            "${PREFIX}playnext {identifier}: Adds the requested song to the front of the queue"
+        ),
         PLAY_NOW(listOf("playnow"), "${PREFIX}playnow {identifier}: Immediately plays the requested song"),
         STOP(listOf("stop", "s"), "${PREFIX}stop: Stops the music playback and clears the queue"),
         PAUSE(listOf("pause", "p"), "${PREFIX}pause: Pauses the music playback"),
