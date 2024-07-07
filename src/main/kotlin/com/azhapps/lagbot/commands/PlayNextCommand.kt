@@ -1,10 +1,10 @@
 package com.azhapps.lagbot.commands
 
-import com.azhapps.lagbot.audio.AudioUtil
+import com.azhapps.lagbot.audio.PlayTime
 import dev.kord.core.event.message.MessageCreateEvent
 
 class PlayNextCommand(messageCreateEvent: MessageCreateEvent): BasePlayCommand(messageCreateEvent) {
 
-    override val playTime: AudioUtil.PlayTime
-        get() = AudioUtil.PlayTime.NEXT
+    override val playTime: PlayTime
+        get() = PlayTime.NEXT
 }

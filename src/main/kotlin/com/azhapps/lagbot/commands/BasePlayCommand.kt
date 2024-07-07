@@ -1,14 +1,11 @@
 package com.azhapps.lagbot.commands
 
-import com.azhapps.lagbot.Main
-import com.azhapps.lagbot.audio.AudioUtil
-import com.azhapps.lagbot.spotify.SpotifyRepository
-import kotlinx.coroutines.launch
+import com.azhapps.lagbot.audio.PlayTime
 import dev.kord.core.event.message.MessageCreateEvent
 
 abstract class BasePlayCommand(messageEvent: MessageCreateEvent) : BaseCommand(messageEvent) {
 
-    abstract val playTime: AudioUtil.PlayTime
+    abstract val playTime: PlayTime
 
     override suspend fun execute() {
        /* val botInVoice = Main.isConnectedToVoice(event)
