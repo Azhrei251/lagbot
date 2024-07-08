@@ -32,10 +32,8 @@ class LinkManager(
         guildLinkMap.values.forEach {
             if (it.state == Link.State.CONNECTED) {
                 val playingTrack = it.player.playingTrack
-                if (it.hasQueuedItems()) {
-                    if (playingTrack == null || playingTrack.info.length <= it.player.position) {
-                        scope.launch { it.playNextInQueue() }
-                    }
+                if (it.hasQueuedItems() && (playingTrack == null || playingTrack.info.length <= it.player.position)) {
+                    scope.launch { it.playNextInQueue() }
                 }
 
                 val latestValidTimeMillis = System.currentTimeMillis() - timeoutMillis

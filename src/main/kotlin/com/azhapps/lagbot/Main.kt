@@ -50,6 +50,7 @@ object Main {
             linkManager = LinkManager(lavaKord, scope)
             commandHandler = CommandHandler(linkManager)
 
+            /* TODO Investigate these later
             kord.createGlobalApplicationCommands {
                 Command.values().forEach {
                     input(it.path.first(), it.description) {
@@ -58,7 +59,7 @@ object Main {
                         }
                     }
                 }
-            }
+            }*/
 
             kord.on<GuildChatInputCommandInteractionCreateEvent> {
                 val info  = CommandInfo(

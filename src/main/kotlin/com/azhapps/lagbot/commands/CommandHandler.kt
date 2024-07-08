@@ -34,21 +34,22 @@ class CommandHandler(
 
             Command.HELP -> help(onResponse)
 
-            // START TODO responses for all of these
-            Command.SKIP -> linkManager.getLink(info.guildId).skip()
+            Command.SKIP -> {
+                linkManager.getLink(info.guildId).skip()
+                onResponse("Skipping!")
+            }
 
             Command.QUEUE -> linkManager.getLink(info.guildId).printQueue(onResponse)
 
-            Command.CLEAR -> linkManager.getLink(info.guildId).clear()
+            Command.CLEAR -> clear(info, onResponse)
 
-            Command.RESUME -> linkManager.getLink(info.guildId).resume()
+            Command.RESUME -> resume(info, onResponse)
 
-            Command.PAUSE -> linkManager.getLink(info.guildId).pause()
+            Command.PAUSE -> pause(info, onResponse)
 
-            Command.LOOP -> linkManager.getLink(info.guildId).loop()
+            Command.LOOP -> enableLoop(info, onResponse)
 
-            Command.STOP_LOOP -> linkManager.getLink(info.guildId).stopLoop()
-            // END TODO
+            Command.STOP_LOOP -> stopLoop(info, onResponse)
 
             Command.STOP -> stop(info, onResponse)
 
@@ -166,6 +167,58 @@ class CommandHandler(
                 onResponse("Given index $index was outside the range of the queue")
             }
         }
+    }
+
+    private suspend fun resume(info: CommandInfo, onResponse: suspend (String) -> Unit) {
+        val link = linkManager.getLink(info.guildId)
+        if (link.isPaused) {
+            onResponse("Resumed")
+            link.resume()
+        } else {
+            onResponse("Nothing to resume!")
+        }
+    }
+
+    private suspend fun pause(info: CommandInfo, onResponse: suspend (String) -> Unit) {
+        val link = linkManager.getLink(info.guildId)
+        if (link.isPlaying) {
+            link.pause()
+            onResponse("Paused!")
+        } else {
+            onResponse("No song currently playing!")
+        }
+    }
+
+    private suspend fun clear(info: CommandInfo, onResponse: suspend (String) -> Unit) {
+        val link = linkManager.getLink(info.guildId)
+        if (link.hasQueuedItems()) {
+            onResponse("Cleared queue")
+            link.clear()
+        } else {
+            onResponse("No songs in queue!")
+        }
+    }
+
+    private suspend fun enableLoop(info: CommandInfo, onResponse: suspend (String) -> Unit) {
+        val link = linkManager.getLink(info.guildId)
+        if (!link.hasQueuedItems()) {
+            onResponse("Nothing in queue!")
+        } else {
+            val looped = link.loop()
+            if (looped == 0) {
+                onResponse("Nothing to loop!")
+            } else {
+                onResponse("Setup loop for $looped songs")
+            }
+        }
+    }
+
+    private suspend fun stopLoop(info: CommandInfo, onResponse: suspend (String) -> Unit) {
+        linkManager.getLink(info.guildId).stopLoop()
+        val link = linkManager.getLink(info.guildId)
+
+        link.stopLoop()
+        onResponse("Loop cleared")
     }
 
     private suspend fun createGithubIssue(

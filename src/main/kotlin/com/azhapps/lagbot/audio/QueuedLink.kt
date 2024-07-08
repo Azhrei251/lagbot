@@ -13,6 +13,11 @@ class QueuedLink(
     val player = link.player
     var state = Link.State.NOT_CONNECTED
     var songLastFinishedAt: Long = -1L
+    var isPaused = false
+    val isPlaying: Boolean
+        get() = player.playingTrack?.let {
+            player.position <= it.info.length
+        } ?: false
 
     private val queue: ArrayDeque<Track> = ArrayDeque()
     private val loopQueue: ArrayDeque<Track> = ArrayDeque()
@@ -132,10 +137,12 @@ class QueuedLink(
     }
 
     suspend fun pause() {
+        isPaused = true
         player.pause(true)
     }
 
     suspend fun resume() {
+        isPaused = false
         player.unPause()
     }
 
