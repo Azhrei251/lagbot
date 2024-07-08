@@ -6,8 +6,8 @@ import com.azhapps.lagbot.audio.QueuedLink
 import com.azhapps.lagbot.github.GithubRepository
 import com.azhapps.lagbot.spotify.SpotifyRepository
 import dev.arbjerg.lavalink.protocol.v4.LoadResult
+import dev.arbjerg.lavalink.protocol.v4.Track
 import dev.schlaubi.lavakord.audio.Link
-import dev.schlaubi.lavakord.rest.loadItem
 
 data class CommandInfo(
     val guildId: ULong,
@@ -34,23 +34,25 @@ class CommandHandler(
 
             Command.HELP -> help(onResponse)
 
-            Command.SKIP -> TODO()
+            // START TODO responses for all of these
+            Command.SKIP -> linkManager.getLink(info.guildId).skip()
 
-            Command.QUEUE -> TODO()
+            Command.QUEUE -> linkManager.getLink(info.guildId).printQueue(onResponse)
 
-            Command.CLEAR -> TODO()
+            Command.CLEAR -> linkManager.getLink(info.guildId).clear()
 
-            Command.RESUME -> TODO()
+            Command.RESUME -> linkManager.getLink(info.guildId).resume()
 
-            Command.PAUSE -> TODO()
+            Command.PAUSE -> linkManager.getLink(info.guildId).pause()
+
+            Command.LOOP -> linkManager.getLink(info.guildId).loop()
+
+            Command.STOP_LOOP -> linkManager.getLink(info.guildId).stopLoop()
+            // END TODO
 
             Command.STOP -> stop(info, onResponse)
 
-            Command.REMOVE -> TODO()
-
-            Command.LOOP -> TODO()
-
-            Command.STOP_LOOP -> TODO()
+            Command.REMOVE -> remove(info, onResponse)
 
             Command.ISSUE -> createGithubIssue(info, onResponse)
 
@@ -76,61 +78,66 @@ class CommandHandler(
             onResponse("Join a voice channel first!")
         } else {
             val link = linkManager.getLink(info.guildId)
-            if (link.link.state != Link.State.CONNECTED) {
-                link.link.connectAudio(info.voiceChannelId)
+            if (link.state != Link.State.CONNECTED) {
+                link.connectAudio(info.voiceChannelId)
             }
 
             if (info.messageContent.contains("open.spotify.com")) {
                 // TODO probably want to inject rather than object ref
                 SpotifyRepository.getSearchTerms(info.messageContent).run {
                     forEach {
-                        playSong(link, it) {
-                            // Do nothing
-                        }
+                        loadSong(link, it, playTime, onResponse)
                     }
                     onResponse("${this.size} tracks added to queue")
                 }
-
             } else {
-                var loadPlayList = true
-                val player = link.player
-                val search = if (request.startsWith("http")) {
-                    info.messageContent
-                } else {
-                    loadPlayList = false
-                    "ytsearch:$request"
-                }
-
-                when (val item = link.link.loadItem(search)) {
-                    is LoadResult.TrackLoaded -> link.play(track = item.data, playTime)
-                    is LoadResult.PlaylistLoaded -> link.play(track = item.data.tracks.first(), playTime)
-                    is LoadResult.SearchResult -> link.play(item.data.tracks.first(), playTime)
-                    is LoadResult.NoMatches -> onTrackLoaded("No song found")
-                    is LoadResult.LoadFailed -> onTrackLoaded(item.data.message ?: "Error encountered")
-                }
-
-                playSong(link, info.messageContent) {
-                    onResponse(it)
-                }
+                loadSong(link, info.messageContent, playTime, onResponse)
             }
         }
     }
 
-    private suspend fun playSong(link: QueuedLink, request: String, onTrackLoaded: suspend (String) -> Unit) {
+    private suspend fun loadSong(
+        link: QueuedLink,
+        request: String,
+        playTime: PlayTime,
+        onResponse: suspend (String) -> Unit
+    ) {
         var loadPlayList = true
-        val player = link.player
         val search = if (request.startsWith("http")) {
             request
         } else {
             loadPlayList = false
             "ytsearch:$request"
         }
-        when (val item = link.link.loadItem(search)) {
-            is LoadResult.TrackLoaded -> player.playTrack(track = item.data)
-            is LoadResult.PlaylistLoaded -> player.playTrack(track = item.data.tracks.first())
-            is LoadResult.SearchResult -> player.playTrack(item.data.tracks.first())
-            is LoadResult.NoMatches -> onTrackLoaded("No song found")
-            is LoadResult.LoadFailed -> onTrackLoaded(item.data.message ?: "Error encountered")
+
+        when (val item = link.loadItem(search)) {
+            is LoadResult.TrackLoaded -> playSong(link, item.data, playTime, onResponse)
+            is LoadResult.PlaylistLoaded -> {
+                if (loadPlayList) {
+                    item.data.tracks.forEach {
+                        link.play(it, PlayTime.QUEUED)
+                    }
+                    onResponse("${item.data.tracks.size} tracks added to queue")
+                } else {
+                    playSong(link, item.data.tracks.first(), playTime, onResponse)
+                }
+            }
+
+            is LoadResult.SearchResult -> playSong(link, item.data.tracks.first(), playTime, onResponse)
+            is LoadResult.NoMatches -> onResponse("No song found")
+            is LoadResult.LoadFailed -> onResponse(item.data.message ?: "Error encountered")
+        }
+    }
+
+    private suspend fun playSong(
+        link: QueuedLink,
+        track: Track,
+        playTime: PlayTime,
+        onResponse: suspend (String) -> Unit
+    ) {
+        val response = link.play(track, playTime)
+        if (response != null) {
+            onResponse(response)
         }
     }
 
@@ -142,16 +149,23 @@ class CommandHandler(
         if (link.player.playingTrack == null) {
             onResponse("Nothing to stop!")
         } else {
-            link.player.stopTrack()
+            link.stop()
             onResponse("Stopped")
         }
-        /*val scheduler = AudioUtil.getScheduler(event.server.get())
-        if (scheduler == null) {
-            event.message.channel.createMessage()
+    }
+
+    private suspend fun remove(info: CommandInfo, onResponse: suspend (String) -> Unit) {
+        val index = info.messageContent.toIntOrNull()
+        if (index == null) {
+            onResponse("Invalid command content: ${info.messageContent}")
         } else {
-            event.message.channel.createMessage("Stopped")
-            scheduler.stop()
-        }*/
+            val removed = linkManager.getLink(info.guildId).remove(index)
+            if (removed.first) {
+                onResponse("Removed song ${removed.second?.info?.title} at position $index")
+            } else {
+                onResponse("Given index $index was outside the range of the queue")
+            }
+        }
     }
 
     private suspend fun createGithubIssue(

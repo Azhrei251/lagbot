@@ -47,7 +47,7 @@ object Main {
                 )
             }
 
-            linkManager = LinkManager(lavaKord)
+            linkManager = LinkManager(lavaKord, scope)
             commandHandler = CommandHandler(linkManager)
 
             kord.createGlobalApplicationCommands {
