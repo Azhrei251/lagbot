@@ -10,12 +10,14 @@ To run locally, update ```discord.token``` in the properties file with your bot 
 lagbot:
   image: azhrei251/lagbot:latest
   environment:
-    DISCORD_TOKEN: YOUR_TOKEN_HERE
-    AFK_TIMEOUT: 600000
-    GITHUB_TOKEN: YOUR_TOKEN_HERE
-    SPOTIFY_CLIENT_ID: YOUR_CLIENT_ID_HERE
-    SPOTIFY_CLIENT_SECRET: YOUR_CLIENT_SECRET_HERE
-    DEBUG: false
+    - DISCORD_TOKEN: YOUR_TOKEN_HERE
+    - AFK_TIMEOUT: 600000
+    - GITHUB_TOKEN: YOUR_TOKEN_HERE
+    - SPOTIFY_CLIENT_ID: YOUR_CLIENT_ID_HERE
+    - SPOTIFY_CLIENT_SECRET: YOUR_CLIENT_SECRET_HERE
+    - DEBUG: false
+    - LAVALINK_URL= YOUR_LAVALINK_URL_HERE
+    - LAVALINK_PASSWORD= YOUR_LAVALINK_PASSWORD_HERE
   restart: unless-stopped
   ```  
 <h4>Codebase commands</h4>
