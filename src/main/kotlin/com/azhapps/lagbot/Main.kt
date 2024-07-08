@@ -95,13 +95,6 @@ object Main {
 
             logger.info("Lagbot loaded")
 
-            /* api.yourself.connectedVoiceChannels.forEach { serverVoiceChannel ->
-                 logger.info("Reconnecting to channel in ${serverVoiceChannel.server.name}")
-                 serverVoiceChannel.connect().thenAccept {
-                     AudioUtil.connect(serverVoiceChannel.server, it)
-                 }
-             } */
-
             kord.login {
                 @OptIn(PrivilegedIntent::class)
                 intents += Intent.MessageContent

@@ -12,7 +12,7 @@ class QueuedLink(
 ) {
     val player = link.player
     var state = Link.State.NOT_CONNECTED
-    var songLastStartedAt: Long = -1L
+    var songLastFinishedAt: Long = -1L
 
     private val queue: ArrayDeque<Track> = ArrayDeque()
     private val loopQueue: ArrayDeque<Track> = ArrayDeque()
@@ -26,6 +26,7 @@ class QueuedLink(
 
     suspend fun disconnectAudio() {
         state = Link.State.NOT_CONNECTED
+        songLastFinishedAt = -1
         link.disconnectAudio()
     }
 
@@ -34,7 +35,7 @@ class QueuedLink(
     suspend fun play(
         track: Track,
         playTime: PlayTime,
-    ): String? {
+    ): String {
         return when (playTime) {
             PlayTime.QUEUED -> play(track)
             PlayTime.IMMEDIATE -> playImmediate(track)
@@ -44,44 +45,45 @@ class QueuedLink(
 
     private suspend fun play(
         track: Track
-    ): String? =
+    ): String =
         if (!player.paused && player.playingTrack == null) {
-            songLastStartedAt = System.currentTimeMillis()
-            player.playTrack(track)
-            null
+            playTrack(track)
         } else {
             queue.add(track)
             updateLoopIfRequired(track)
             getTrackQueueInfo(track)
         }
 
-    private suspend fun playImmediate(track: Track): String? {
-        songLastStartedAt = System.currentTimeMillis()
-        player.playTrack(track)
+    private suspend fun playImmediate(track: Track): String {
         updateLoopIfRequired(track)
-        return null
+        return playTrack(track)
     }
 
-    private suspend fun playNext(track: Track): String {
+    private fun playNext(track: Track): String {
         queue.addFirst(track)
         updateLoopIfRequired(track)
         return getTrackQueueInfo(track, 1)
     }
 
+    private suspend fun playTrack(track: Track): String {
+        songLastFinishedAt = System.currentTimeMillis() + track.info.length
+        player.playTrack(track)
+        return "Playing ${track.info.title}"
+    }
+
     suspend fun playNextInQueue(): Boolean {
         return if (!queue.isEmpty()) {
-            songLastStartedAt = System.currentTimeMillis()
-            player.playTrack(queue.removeFirst())
+            playTrack(queue.removeFirst())
             true
         } else {
             if (loopQueue.isNotEmpty()) {
                 queue.addAll(loopQueue.map {
                     it
                 })
-                player.playTrack(queue.removeFirst())
+                playTrack(queue.removeFirst())
                 true
             } else {
-               false
+                false
             }
         }
     }

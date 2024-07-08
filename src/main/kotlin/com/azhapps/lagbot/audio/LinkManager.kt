@@ -17,21 +17,7 @@ class LinkManager(
     init {
         scope.launch {
             while (true) {
-                guildLinkMap.values.forEach {
-                    if (it.state == Link.State.CONNECTED) {
-                        val playingTrack = it.player.playingTrack
-                        if (it.hasQueuedItems()) {
-                            if (playingTrack == null || playingTrack.info.length <= it.player.position) {
-                                launch { it.playNextInQueue() }
-                            }
-                        }
-
-                        val latestValidTimeMillis = System.currentTimeMillis() - timeoutMillis
-                        if (it.songLastStartedAt <= latestValidTimeMillis) {
-                            launch { it.disconnectAudio() }
-                        }
-                    }
-                }
+                checkQueue()
                 delay(10)
             }
         }
@@ -40,7 +26,26 @@ class LinkManager(
     // Attempts to retrieve the existing link for the given guild, if it doesn't exist, creates a new one
     fun getLink(guildId: ULong): QueuedLink = guildLinkMap[guildId] ?: QueuedLink(lavaKord.getLink(guildId)).apply {
         guildLinkMap[guildId] = this
+    }
 
-        // TODO timeouts?
+    private suspend fun checkQueue() {
+        guildLinkMap.values.forEach {
+            if (it.state == Link.State.CONNECTED) {
+                val playingTrack = it.player.playingTrack
+                if (it.hasQueuedItems()) {
+                    if (playingTrack == null || playingTrack.info.length <= it.player.position) {
+                        scope.launch { it.playNextInQueue() }
+                    }
+                }
+
+                val latestValidTimeMillis = System.currentTimeMillis() - timeoutMillis
+                if (
+                    it.songLastFinishedAt != -1L &&
+                    it.songLastFinishedAt <= latestValidTimeMillis
+                ) {
+                    scope.launch { it.disconnectAudio() }
+                }
+            }
+        }
     }
 }
