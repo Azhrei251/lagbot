@@ -28,7 +28,7 @@ object GithubRepository {
         .build()
     private val githubDataSource = retrofit.create(GithubDataSource::class.java)
 
-    fun createIssue(title: String, body: String, sendResponse: (String) -> Unit) {
+    fun createIssue(title: String, body: String, sendResponse: suspend (String) -> Unit) {
         scope.launch {
             val response = githubDataSource.createIssue(CreateIssueRequest(title, body))
             if (response.isSuccessful) {

@@ -10,6 +10,8 @@ object PropertiesUtil {
     const val GITHUB_TOKEN = "github.token"
     const val SPOTIFY_CLIENT_ID = "spotify.client.id"
     const val SPOTIFY_CLIENT_SECRET = "spotify.client.secret"
+    const val LAVALINK_URL = "lavalink.url"
+    const val LAVALINK_PASSWORD = "lavalink.password"
     const val DEBUG = "debug"
 
     private val defaultProperties by lazy {
