@@ -6,8 +6,10 @@ import com.azhapps.lagbot.utils.PropertiesUtil
 import com.azhapps.lagbot.utils.displayUsername
 import dev.kord.core.Kord
 import dev.kord.core.behavior.interaction.response.respond
+import dev.kord.core.event.gateway.DisconnectEvent
 import dev.kord.core.event.interaction.GuildChatInputCommandInteractionCreateEvent
 import dev.kord.core.event.message.MessageCreateEvent
+import dev.kord.core.gateway.start
 import dev.kord.core.on
 import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
@@ -93,6 +95,12 @@ object Main {
                 }
             }
 
+            kord.on<DisconnectEvent> {
+                if (this is DisconnectEvent.RetryLimitReachedEvent) {
+                    logger.warn("Kords given up on reconnecting - manually retrying")
+                    kord.gateway.start(PropertiesUtil.get(PropertiesUtil.DISCORD_TOKEN))
+                }
+            }
 
             logger.info("Lagbot loaded")
 
