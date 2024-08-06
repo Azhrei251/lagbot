@@ -23,7 +23,7 @@ kotlin {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:2.0.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:2.0.10"
     implementation "dev.kord:kord-core:0.14.0"
     implementation 'dev.schlaubi.lavakord:kord:7.0.3'
     implementation 'dev.arbjerg:lavaplayer:2.2.1'
