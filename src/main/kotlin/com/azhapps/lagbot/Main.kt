@@ -2,6 +2,7 @@ package com.azhapps.lagbot
 
 import com.azhapps.lagbot.audio.AudioUtil
 import com.azhapps.lagbot.commands.Commands
+import com.azhapps.lagbot.local.LocalTrackChecker
 import com.azhapps.lagbot.utils.PropertiesUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.newFixedThreadPoolContext

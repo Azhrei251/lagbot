@@ -1,12 +1,14 @@
 package com.azhapps.lagbot.audio
 
 import com.azhapps.lagbot.Main
+import com.azhapps.lagbot.local.LocalTrackChecker
 import com.azhapps.lagbot.utils.Patterns
 import com.azhapps.lagbot.utils.PropertiesUtil
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.local.LocalAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager
@@ -32,6 +34,7 @@ object AudioUtil {
             PropertiesUtil.get(PropertiesUtil.VISITOR_DATA)
         )
         DefaultAudioPlayerManager().apply {
+            registerSourceManager(LocalAudioSourceManager())
             registerSourceManager(YoutubeAudioSourceManager())
             registerSourceManager(BandcampAudioSourceManager())
             registerSourceManager(VimeoAudioSourceManager())
@@ -39,6 +42,7 @@ object AudioUtil {
             registerSourceManager(SoundCloudAudioSourceManager.Builder().build())
         }
     }
+    private val localTrackChecker = LocalTrackChecker()
 
     fun connect(server: Server, audioConnection: AudioConnection) {
         val player = playerMap[server.id] ?: playerManager.createPlayer().apply {
@@ -77,13 +81,18 @@ object AudioUtil {
             player.addListener(this)
         }
 
-        //If we've got a valid URL, try to load it. Otherwise, do a youtube search
+        //If we've got a valid URL, try to load it. Otherwise, do a YouTube search
         var isSearch = false
         val identifierToUse = if (Patterns.WEB_URL.matcher(identifier).matches()) {
             identifier
         } else {
-            isSearch = true
-            "ytsearch:${identifier}"
+            val localFilePath = localTrackChecker.fuzzyLocalSearch(identifier)
+            if (localFilePath != null) {
+                localFilePath
+            } else {
+                isSearch = true
+                "ytsearch:${identifier}"
+            }
         }
 
         playerManager.loadItem(identifierToUse, object : AudioLoadResultHandler {
@@ -92,7 +101,7 @@ object AudioUtil {
             }
 
             override fun playlistLoaded(playlist: AudioPlaylist) {
-                //Search results are returned as a playlist oddly. Only add the first. Otherwise add the whole playlist
+                //Search results are returned as a playlist oddly. Only add the first. Otherwise, add the whole playlist
                 if (isSearch) {
                     onTrackAdded(addIndividualTrack(playlist.tracks.first(), playTime, scheduler))
 

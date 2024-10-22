@@ -13,6 +13,7 @@ object PropertiesUtil {
     const val DEBUG = "debug"
     const val PO_TOKEN = "po.token"
     const val VISITOR_DATA = "visitor.data"
+    const val LOCAL_AUDIO_DIR = "local.audio.dir"
 
     private val defaultProperties by lazy {
         Properties().apply {
