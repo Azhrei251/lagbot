@@ -2,7 +2,9 @@
 
 A simple discord music bot written in Kotlin using Javacord and LavaPlayer.
 
-To run locally, update ```discord.token``` in the properties file with your bot token and add the bot to your server.
+To run locally, update ```discord.token``` in the properties file with your bot token and add the bot to your server. You may need to fill out other properties also.
+
+poToken and visitorData are used to improve YouTube playback reliability. To generate use: https://github.com/iv-org/youtube-trusted-session-generator
 
 <h4>Docker Compose</h4>
 
@@ -16,6 +18,8 @@ lagbot:
     SPOTIFY_CLIENT_ID: YOUR_CLIENT_ID_HERE
     SPOTIFY_CLIENT_SECRET: YOUR_CLIENT_SECRET_HERE
     DEBUG: false
+    PO_TOKEN: YOUR_PO_TOKEN_HERE
+    VISITOR_DATA: YOUR_VISITOR_DATA_HERE
   restart: unless-stopped
   ```  
 <h4>Codebase commands</h4>

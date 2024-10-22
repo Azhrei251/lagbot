@@ -10,16 +10,16 @@ import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManag
 import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager
-import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
+import dev.lavalink.youtube.YoutubeAudioSourceManager
+import dev.lavalink.youtube.clients.Web
 import org.javacord.api.audio.AudioConnection
 import org.javacord.api.entity.channel.TextChannel
 import org.javacord.api.entity.server.Server
 import org.slf4j.LoggerFactory
 import java.util.*
-import java.util.regex.Pattern
 
 object AudioUtil {
     private val logger = LoggerFactory.getLogger(AudioUtil::class.java)
@@ -27,6 +27,10 @@ object AudioUtil {
     private val schedulerMap = mutableMapOf<Long, TrackScheduler>()
     private val connectionMap = mutableMapOf<Long, AudioConnection>()
     private val playerManager by lazy {
+        Web.setPoTokenAndVisitorData(
+            PropertiesUtil.get(PropertiesUtil.PO_TOKEN),
+            PropertiesUtil.get(PropertiesUtil.VISITOR_DATA)
+        )
         DefaultAudioPlayerManager().apply {
             registerSourceManager(YoutubeAudioSourceManager())
             registerSourceManager(BandcampAudioSourceManager())

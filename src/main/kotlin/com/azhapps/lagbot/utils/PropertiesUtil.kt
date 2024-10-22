@@ -11,6 +11,8 @@ object PropertiesUtil {
     const val SPOTIFY_CLIENT_ID = "spotify.client.id"
     const val SPOTIFY_CLIENT_SECRET = "spotify.client.secret"
     const val DEBUG = "debug"
+    const val PO_TOKEN = "po.token"
+    const val VISITOR_DATA = "visitor.data"
 
     private val defaultProperties by lazy {
         Properties().apply {
