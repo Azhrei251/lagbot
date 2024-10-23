@@ -4,7 +4,6 @@ import com.azhapps.lagbot.audio.AudioManager
 import com.azhapps.lagbot.audio.PlayTime
 import com.azhapps.lagbot.github.GithubRepository
 import com.azhapps.lagbot.spotify.SpotifyRepository
-import kotlinx.coroutines.CoroutineScope
 import org.javacord.api.event.message.MessageCreateEvent
 
 private const val PREFIX = "!"
