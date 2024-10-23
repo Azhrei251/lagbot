@@ -17,17 +17,13 @@ object Main {
 
     lateinit var api: DiscordApi
 
-    private val mainScope by lazy {
-        CoroutineScope(Dispatchers.Main)
-    }
     private val ioScope by lazy {
         CoroutineScope(Dispatchers.IO)
     }
-    private val githubRepository = GithubRepository(mainScope)
-    private val spotifyRepository = SpotifyRepository()
+    private val githubRepository = GithubRepository(ioScope)
+    private val spotifyRepository = SpotifyRepository(ioScope)
     private val audioManager = AudioManager(ioScope)
     private val commands = Commands(
-        scope = mainScope,
         githubRepository = githubRepository,
         spotifyRepository = spotifyRepository,
         audioManager = audioManager

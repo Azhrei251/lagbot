@@ -3,7 +3,7 @@ package com.azhapps.lagbot.spotify
 import com.azhapps.lagbot.spotify.model.AuthToken
 import com.azhapps.lagbot.utils.NetworkUtils
 import com.azhapps.lagbot.utils.PropertiesUtil
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -16,6 +16,7 @@ private const val SPOTIFY_AUTH_BASE_URL = "https://accounts.spotify.com/"
 private const val EXPIRY_OFFSET = 60000L
 
 class SpotifyRepository(
+    private val scope: CoroutineScope,
     loggingInterceptor: HttpLoggingInterceptor = NetworkUtils.loggingInterceptor,
     converterFactory: GsonConverterFactory = NetworkUtils.converterFactory,
 ) {
@@ -61,23 +62,30 @@ class SpotifyRepository(
         .build()
     private val spotifyDataSource = spotifyRetrofit.create(SpotifyDataSource::class.java)
 
-    suspend fun getSearchTerms(identifier: String): List<String> {
-        updateToken()
+    fun getSearchTerms(
+        identifier: String,
+        onResult: (List<String>) -> Unit,
+    )  {
+        scope.launch {
+            updateToken()
 
-        return if (authToken != null) {
-            identifier.split('/')
-                .lastOrNull()
-                ?.split('?')
-                ?.firstOrNull()
-                ?.let { lookupId ->
-                    when {
-                        identifier.contains("track") -> getTrackSearchTerm(lookupId)
-                        identifier.contains("album") -> getAlbumSearchTerms(lookupId)
-                        identifier.contains("playlist") -> getPlaylistSearchTerms(lookupId)
-                        else -> emptyList()
-                    }
-                } ?: emptyList()
-        } else emptyList()
+            val result = if (authToken != null) {
+                identifier.split('/')
+                    .lastOrNull()
+                    ?.split('?')
+                    ?.firstOrNull()
+                    ?.let { lookupId ->
+                        when {
+                            identifier.contains("track") -> getTrackSearchTerm(lookupId)
+                            identifier.contains("album") -> getAlbumSearchTerms(lookupId)
+                            identifier.contains("playlist") -> getPlaylistSearchTerms(lookupId)
+                            else -> emptyList()
+                        }
+                    } ?: emptyList()
+            } else emptyList()
+
+            onResult(result)
+        }
     }
 
     private suspend fun getTrackSearchTerm(trackId: String) =

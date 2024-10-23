@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 class AudioManager(
-    ioScope: CoroutineScope,
+    scope: CoroutineScope,
 ) {
     private val logger = LoggerFactory.getLogger(AudioManager::class.java)
     private val playerMap = mutableMapOf<Long, AudioPlayer>()
@@ -45,7 +45,7 @@ class AudioManager(
             registerSourceManager(SoundCloudAudioSourceManager.Builder().build())
         }
     }
-    private val localTrackChecker: LocalTrackChecker = LocalTrackChecker(ioScope)
+    private val localTrackChecker: LocalTrackChecker = LocalTrackChecker(scope)
 
     fun connect(server: Server, audioConnection: AudioConnection) {
         val player = playerMap[server.id] ?: playerManager.createPlayer().apply {

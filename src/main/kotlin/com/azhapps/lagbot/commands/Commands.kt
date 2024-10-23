@@ -10,7 +10,6 @@ import org.javacord.api.event.message.MessageCreateEvent
 private const val PREFIX = "!"
 
 class Commands(
-    internal val scope: CoroutineScope,
     internal val audioManager: AudioManager,
     internal val githubRepository: GithubRepository,
     internal val spotifyRepository: SpotifyRepository,

@@ -17,7 +17,7 @@ private const val FUZZY_THRESHOLD_FACTOR = 1.8
 private const val MIN_TOTAL_LENGTH_TO_CONSIDER = 4
 
 class LocalTrackChecker(
-    private val ioScope: CoroutineScope,
+    private val scope: CoroutineScope,
     private val audioDir: File = File(PropertiesUtil.get(PropertiesUtil.LOCAL_AUDIO_DIR)),
     private val scorer: FuzzyScore = FuzzyScore(Locale.getDefault()),
     private val logger: Logger = LoggerFactory.getLogger(LocalTrackChecker::class.java),
@@ -27,7 +27,7 @@ class LocalTrackChecker(
     private val processingInterval = PropertiesUtil.get(PropertiesUtil.LOCAL_AUDIO_REFRESH_PERIOD).toLong()
 
     init {
-        ioScope.launch {
+        scope.launch {
             while (true) {
                 if (System.currentTimeMillis() - lastLocalProcessingStartTime > processingInterval) {
                     processLocalAudio()
@@ -41,13 +41,13 @@ class LocalTrackChecker(
         lastLocalProcessingStartTime = System.currentTimeMillis()
 
         if (audioDir.isDirectory && audioDir.canRead()) {
-            ioScope.launch {
+            scope.launch {
                 val jobList: MutableList<Job> = mutableListOf()
                 val newLocalTracks: MutableList<LocalAudioTrackInfo> = mutableListOf()
 
                 // Split initialization between subdirectories of the root audio directory
                 audioDir.listFiles().forEach {
-                    jobList.add(ioScope.launch {
+                    jobList.add(scope.launch {
                         if (it.isDirectory) {
                             it.walkTopDown().forEach {
                                 parseFile(it, newLocalTracks)

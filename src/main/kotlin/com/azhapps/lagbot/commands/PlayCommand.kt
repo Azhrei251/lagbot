@@ -2,7 +2,6 @@ package com.azhapps.lagbot.commands
 
 import com.azhapps.lagbot.Main
 import com.azhapps.lagbot.audio.PlayTime
-import kotlinx.coroutines.launch
 import org.javacord.api.event.message.MessageCreateEvent
 
 fun Commands.play(event: MessageCreateEvent, playTime: PlayTime) {
@@ -29,15 +28,13 @@ fun Commands.play(event: MessageCreateEvent, playTime: PlayTime) {
 
 private fun Commands.playOrLookupSong(event: MessageCreateEvent, playTime: PlayTime, songRequest: String) {
     if (songRequest.contains("open.spotify.com")) {
-        scope.launch {
-            spotifyRepository.getSearchTerms(songRequest).run {
-                forEach {
-                    audioManager.playSong(event.server.get(), it, event.channel, playTime) {
-                        //Do nothing
-                    }
+        spotifyRepository.getSearchTerms(songRequest) { spotifyResults ->
+            spotifyResults.forEach {
+                audioManager.playSong(event.server.get(), it, event.channel, playTime) {
+                    //Do nothing
                 }
-                event.channel.sendMessage("${this.size} tracks added to queue")
             }
+            event.channel.sendMessage("${spotifyResults.size} tracks added to queue")
         }
     } else {
         audioManager.playSong(event.server.get(), songRequest, event.channel, playTime) {
