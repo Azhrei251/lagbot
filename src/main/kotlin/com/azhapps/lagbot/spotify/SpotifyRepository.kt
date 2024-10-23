@@ -3,6 +3,7 @@ package com.azhapps.lagbot.spotify
 import com.azhapps.lagbot.spotify.model.AuthToken
 import com.azhapps.lagbot.utils.NetworkUtils
 import com.azhapps.lagbot.utils.PropertiesUtil
+import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit

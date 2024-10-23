@@ -1,48 +1,51 @@
 package com.azhapps.lagbot.commands
 
 import com.azhapps.lagbot.audio.AudioManager
+import com.azhapps.lagbot.audio.PlayTime
 import com.azhapps.lagbot.github.GithubRepository
+import com.azhapps.lagbot.spotify.SpotifyRepository
 import kotlinx.coroutines.CoroutineScope
 import org.javacord.api.event.message.MessageCreateEvent
 
 private const val PREFIX = "!"
 
 class Commands(
-    private val scope: CoroutineScope,
-    private val githubRepository: GithubRepository,
-    private val audioManager: AudioManager,
+    internal val scope: CoroutineScope,
+    internal val audioManager: AudioManager,
+    internal val githubRepository: GithubRepository,
+    internal val spotifyRepository: SpotifyRepository,
 ) {
 
     fun handle(messageEvent: MessageCreateEvent) {
         get(messageEvent.messageContent)?.let { info ->
             when (info) {
-                Info.PLAY -> PlayCommand(messageEvent, audioManager, scope).execute()
+                Info.PLAY -> play(messageEvent, PlayTime.QUEUED)
 
-                Info.PLAY_NEXT -> PlayNextCommand(messageEvent, audioManager, scope).execute()
+                Info.PLAY_NEXT -> play(messageEvent, PlayTime.NEXT)
 
-                Info.PLAY_NOW -> PlayNowCommand(messageEvent, audioManager, scope).execute()
+                Info.PLAY_NOW -> play(messageEvent, PlayTime.IMMEDIATE)
 
-                Info.HELP -> HelpCommand(messageEvent).execute()
+                Info.HELP -> help(messageEvent)
 
-                Info.SKIP -> SkipCommand(audioManager, messageEvent).execute()
+                Info.SKIP -> skip(messageEvent)
 
-                Info.QUEUE -> QueueCommand(audioManager, messageEvent).execute()
+                Info.QUEUE -> queue(messageEvent)
 
-                Info.CLEAR -> ClearCommand(audioManager, messageEvent).execute()
+                Info.CLEAR -> clear(messageEvent)
 
-                Info.RESUME -> ResumeCommand(audioManager, messageEvent).execute()
+                Info.RESUME -> resume(messageEvent)
 
-                Info.PAUSE -> PauseCommand(audioManager, messageEvent).execute()
+                Info.PAUSE -> pause(messageEvent)
 
-                Info.STOP -> StopCommand(audioManager, messageEvent).execute()
+                Info.STOP -> stop(messageEvent)
 
-                Info.REMOVE -> RemoveCommand(audioManager, messageEvent).execute()
+                Info.REMOVE -> remove(messageEvent)
 
-                Info.LOOP -> LoopCommand(audioManager, messageEvent).execute()
+                Info.LOOP -> loop(messageEvent)
 
-                Info.STOP_LOOP -> LoopStopCommand(audioManager, messageEvent).execute()
+                Info.STOP_LOOP -> loopStop(messageEvent)
 
-                Info.ISSUE -> CreateIssueCommand(messageEvent, githubRepository).execute()
+                Info.ISSUE -> createIssue(messageEvent)
             }
         }
     }
@@ -50,7 +53,7 @@ class Commands(
     private fun get(string: String): Info? {
         val matchString = string.substringBefore(' ')
 
-        return Info.values().firstOrNull { info ->
+        return Info.entries.firstOrNull { info ->
             info.keys.any {
                 matchString.equals("$PREFIX${it}", ignoreCase = true)
             }

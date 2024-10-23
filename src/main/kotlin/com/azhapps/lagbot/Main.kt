@@ -3,6 +3,7 @@ package com.azhapps.lagbot
 import com.azhapps.lagbot.audio.AudioManager
 import com.azhapps.lagbot.commands.Commands
 import com.azhapps.lagbot.github.GithubRepository
+import com.azhapps.lagbot.spotify.SpotifyRepository
 import com.azhapps.lagbot.utils.PropertiesUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,8 +24,14 @@ object Main {
         CoroutineScope(Dispatchers.IO)
     }
     private val githubRepository = GithubRepository(mainScope)
+    private val spotifyRepository = SpotifyRepository()
     private val audioManager = AudioManager(ioScope)
-    private val commands = Commands(mainScope, githubRepository, audioManager)
+    private val commands = Commands(
+        scope = mainScope,
+        githubRepository = githubRepository,
+        spotifyRepository = spotifyRepository,
+        audioManager = audioManager
+    )
     private val logger = LoggerFactory.getLogger(Main::class.java)
 
     fun isConnectedToVoice(event: MessageEvent) = event.server.get().getConnectedVoiceChannel(api.yourself).isPresent
