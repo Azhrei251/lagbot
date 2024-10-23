@@ -3,10 +3,14 @@ package com.azhapps.lagbot.commands
 import com.azhapps.lagbot.Main
 import com.azhapps.lagbot.audio.AudioUtil
 import com.azhapps.lagbot.spotify.SpotifyRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.javacord.api.event.message.MessageCreateEvent
 
-abstract class BasePlayCommand(messageEvent: MessageCreateEvent) : BaseCommand(messageEvent) {
+abstract class BasePlayCommand(
+    messageEvent: MessageCreateEvent,
+    private val scope: CoroutineScope,
+) : BaseCommand(messageEvent) {
 
     abstract val playTime: AudioUtil.PlayTime
 
@@ -34,7 +38,7 @@ abstract class BasePlayCommand(messageEvent: MessageCreateEvent) : BaseCommand(m
 
     private fun playOrLookupSong(songRequest: String) {
         if (songRequest.contains("open.spotify.com")) {
-            Main.mainScope.launch {
+            scope.launch {
                 SpotifyRepository.getSearchTerms(songRequest).run {
                     forEach {
                         AudioUtil.playSong(event.server.get(), it, event.channel, playTime) {

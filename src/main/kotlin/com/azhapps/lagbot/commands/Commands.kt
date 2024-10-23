@@ -1,19 +1,24 @@
 package com.azhapps.lagbot.commands
 
+import com.azhapps.lagbot.github.GithubRepository
+import kotlinx.coroutines.CoroutineScope
 import org.javacord.api.event.message.MessageCreateEvent
 
-object Commands {
+private const val PREFIX = "!"
 
-    private const val PREFIX = "!"
+class Commands(
+    private val scope: CoroutineScope,
+    private val githubRepository: GithubRepository,
+) {
 
     fun handle(messageEvent: MessageCreateEvent) {
         get(messageEvent.messageContent)?.let { info ->
             when (info) {
-                Info.PLAY -> PlayCommand(messageEvent).execute()
+                Info.PLAY -> PlayCommand(messageEvent, scope).execute()
 
-                Info.PLAY_NEXT -> PlayNextCommand(messageEvent).execute()
+                Info.PLAY_NEXT -> PlayNextCommand(messageEvent, scope).execute()
 
-                Info.PLAY_NOW -> PlayNowCommand(messageEvent).execute()
+                Info.PLAY_NOW -> PlayNowCommand(messageEvent, scope).execute()
 
                 Info.HELP -> HelpCommand(messageEvent).execute()
 
@@ -35,7 +40,7 @@ object Commands {
 
                 Info.STOP_LOOP -> LoopStopCommand(messageEvent).execute()
 
-                Info.ISSUE -> CreateIssueCommand(messageEvent).execute()
+                Info.ISSUE -> CreateIssueCommand(messageEvent, githubRepository).execute()
             }
         }
     }
@@ -53,7 +58,10 @@ object Commands {
     enum class Info(val keys: List<String>, val helpText: String) {
         HELP(listOf("help", "h"), "${PREFIX}help: Provides a list of commands and their uses"),
         PLAY(listOf("play", "p"), "${PREFIX}play {identifier}: Adds the requested song to the end of the queue"),
-        PLAY_NEXT(listOf("playnext", "pn"), "${PREFIX}playnext {identifier}: Adds the requested song to the front of the queue"),
+        PLAY_NEXT(
+            listOf("playnext", "pn"),
+            "${PREFIX}playnext {identifier}: Adds the requested song to the front of the queue"
+        ),
         PLAY_NOW(listOf("playnow"), "${PREFIX}playnow {identifier}: Immediately plays the requested song"),
         STOP(listOf("stop", "s"), "${PREFIX}stop: Stops the music playback and clears the queue"),
         PAUSE(listOf("pause", "p"), "${PREFIX}pause: Pauses the music playback"),

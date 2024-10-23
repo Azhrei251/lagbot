@@ -1,16 +1,19 @@
 package com.azhapps.lagbot.github
 
-import com.azhapps.lagbot.Main.mainScope
 import com.azhapps.lagbot.github.model.CreateIssueRequest
 import com.azhapps.lagbot.utils.NetworkUtils
 import com.azhapps.lagbot.utils.PropertiesUtil
 import com.azhapps.lagbot.utils.PropertiesUtil.GITHUB_TOKEN
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 
-object GithubRepository {
-    private const val GITHUB_API_BASE_URL = "https://api.github.com/"
+private const val GITHUB_API_BASE_URL = "https://api.github.com/"
+
+class GithubRepository(
+    private val scope: CoroutineScope
+) {
     private val retrofit = Retrofit.Builder()
         .baseUrl(GITHUB_API_BASE_URL)
         .addConverterFactory(NetworkUtils.converterFactory)
@@ -29,7 +32,7 @@ object GithubRepository {
     private val githubDataSource = retrofit.create(GithubDataSource::class.java)
 
     fun createIssue(title: String, body: String, sendResponse: (String) -> Unit) {
-        mainScope.launch {
+        scope.launch {
             val response = githubDataSource.createIssue(CreateIssueRequest(title, body))
             if (response.isSuccessful) {
                 response.body()?.let {

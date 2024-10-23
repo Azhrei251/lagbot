@@ -1,9 +1,13 @@
 package com.azhapps.lagbot.commands
 
 import com.azhapps.lagbot.audio.AudioUtil
+import kotlinx.coroutines.CoroutineScope
 import org.javacord.api.event.message.MessageCreateEvent
 
-class PlayCommand(messageCreateEvent: MessageCreateEvent): BasePlayCommand(messageCreateEvent) {
+class PlayCommand(
+    messageCreateEvent: MessageCreateEvent,
+    scope: CoroutineScope,
+): BasePlayCommand(messageCreateEvent, scope) {
 
     override val playTime: AudioUtil.PlayTime
         get() = AudioUtil.PlayTime.QUEUED

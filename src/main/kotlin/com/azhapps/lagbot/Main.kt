@@ -2,6 +2,7 @@ package com.azhapps.lagbot
 
 import com.azhapps.lagbot.audio.AudioUtil
 import com.azhapps.lagbot.commands.Commands
+import com.azhapps.lagbot.github.GithubRepository
 import com.azhapps.lagbot.utils.PropertiesUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,12 +16,14 @@ object Main {
 
     lateinit var api: DiscordApi
 
-    val mainScope by lazy {
+    private val mainScope by lazy {
         CoroutineScope(Dispatchers.Main)
     }
-    val ioScope by lazy {
+    private val ioScope by lazy {
         CoroutineScope(Dispatchers.IO)
     }
+    private val githubRepository = GithubRepository(mainScope)
+    private val commands = Commands(mainScope, githubRepository)
 
     private val logger = LoggerFactory.getLogger(Main::class.java)
 
@@ -44,7 +47,7 @@ object Main {
         }
 
         api.addMessageCreateListener {
-            Commands.handle(it)
+            commands.handle(it)
         }
 
         AudioUtil.setup(ioScope)
