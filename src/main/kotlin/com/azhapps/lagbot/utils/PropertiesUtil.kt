@@ -14,6 +14,7 @@ object PropertiesUtil {
     const val PO_TOKEN = "po.token"
     const val VISITOR_DATA = "visitor.data"
     const val LOCAL_AUDIO_DIR = "local.audio.dir"
+    const val LOCAL_AUDIO_REFRESH_PERIOD = "local.audio.refresh.period"
 
     private val defaultProperties by lazy {
         Properties().apply {

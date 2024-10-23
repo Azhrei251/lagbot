@@ -20,7 +20,10 @@ lagbot:
     DEBUG: false
     PO_TOKEN: YOUR_PO_TOKEN_HERE
     VISITOR_DATA: YOUR_VISITOR_DATA_HERE
-  restart: unless-stopped
+    LOCAL_AUDIO_REFRESH_PERIOD: 86400000
+  volumes:
+    - /path/to/your/audio:/audio
+restart: unless-stopped
   ```  
 <h4>Codebase commands</h4>
 

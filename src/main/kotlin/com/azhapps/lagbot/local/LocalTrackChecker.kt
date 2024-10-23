@@ -6,10 +6,7 @@ import com.sedmelluq.discord.lavaplayer.container.MediaContainerHints
 import com.sedmelluq.discord.lavaplayer.container.MediaContainerRegistry
 import com.sedmelluq.discord.lavaplayer.source.local.LocalSeekableInputStream
 import com.sedmelluq.discord.lavaplayer.track.AudioReference
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.joinAll
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.apache.commons.text.similarity.FuzzyScore
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -25,38 +22,50 @@ class LocalTrackChecker(
     private val scorer: FuzzyScore = FuzzyScore(Locale.getDefault()),
     private val logger: Logger = LoggerFactory.getLogger(LocalTrackChecker::class.java),
 ) {
-    // TODO Some sort of save to disk + periodic update (or folder watching)
-    private val localTracks: MutableList<LocalAudioTrackInfo> = mutableListOf()
-    private var initFinished: Boolean = false
+    private var localTracks: MutableList<LocalAudioTrackInfo> = mutableListOf()
+    private var lastLocalProcessingStartTime = -1L
+    private val processingInterval = PropertiesUtil.get(PropertiesUtil.LOCAL_AUDIO_REFRESH_PERIOD).toLong()
 
     init {
-        val initStart = System.currentTimeMillis()
-        val jobList: MutableList<Job> = mutableListOf()
+        ioScope.launch {
+            while (true) {
+                if (System.currentTimeMillis() - lastLocalProcessingStartTime > processingInterval) {
+                    processLocalAudio()
+                }
+                delay(60000L)
+            }
+        }
+    }
+
+    private fun processLocalAudio() {
+        lastLocalProcessingStartTime = System.currentTimeMillis()
 
         if (audioDir.isDirectory && audioDir.canRead()) {
             ioScope.launch {
+                val jobList: MutableList<Job> = mutableListOf()
+                val newLocalTracks: MutableList<LocalAudioTrackInfo> = mutableListOf()
+
                 // Split initialization between subdirectories of the root audio directory
                 audioDir.listFiles().forEach {
                     jobList.add(ioScope.launch {
                         if (it.isDirectory) {
                             it.walkTopDown().forEach {
-                                parseFile(it)
+                                parseFile(it, newLocalTracks)
                             }
                         } else {
-                            parseFile(it)
+                            parseFile(it, newLocalTracks)
                         }
                     })
                 }
                 jobList.joinAll()
 
-                val initDuration = System.currentTimeMillis() - initStart
-                initFinished = true
-                logger.info("Init finished in ${initDuration}ms")
+                localTracks = newLocalTracks
+                logger.info("Processing finished in ${System.currentTimeMillis() - lastLocalProcessingStartTime}ms")
             }
         }
     }
 
-    private fun parseFile(file: File) {
+    private fun parseFile(file: File, trackList: MutableList<LocalAudioTrackInfo>) {
         if (file.exists() && file.isFile && file.canRead()) {
             try {
                 val lastDotIndex: Int = file.name.lastIndexOf('.')
@@ -70,7 +79,7 @@ class LocalTrackChecker(
                 ).detectContainer()
 
                 if (detectionResult.isSupportedFile) {
-                    localTracks.add(LocalAudioTrackInfo(detectionResult.trackInfo, file.absolutePath))
+                    trackList.add(LocalAudioTrackInfo(detectionResult.trackInfo, file.absolutePath))
                 }
             } catch (e: Exception) {
                 logger.info("Unable to parse file ${file.absoluteFile}, reason: ${e.message}")
@@ -80,14 +89,16 @@ class LocalTrackChecker(
 
     fun fuzzyLocalSearch(identifier: String): String? {
         // Don't attempt to search locally for particularly short identifiers.
-        if (!initFinished || identifier.length < MIN_TOTAL_LENGTH_TO_CONSIDER) return null
+        if (identifier.length < MIN_TOTAL_LENGTH_TO_CONSIDER) return null
+
+        val searchSpace = localTracks.toList()
 
         val searchStartTime = System.currentTimeMillis()
         val splitIdentifier = identifier.split("\\s+".toRegex())
 
         var max = 0
         var maxIndex: Int = -1
-        localTracks.forEachIndexed { i, localAudioTrackInfo ->
+        searchSpace.forEachIndexed { i, localAudioTrackInfo ->
             val trackScore = splitIdentifier.sumOf { piece ->
                 scorer.fuzzyScore(localAudioTrackInfo.trackInfo.title, piece) +
                         scorer.fuzzyScore(localAudioTrackInfo.trackInfo.author, piece)
@@ -99,7 +110,7 @@ class LocalTrackChecker(
         }
 
         val result = if (maxIndex != -1 && max >= identifier.length * FUZZY_THRESHOLD_FACTOR) {
-            localTracks[maxIndex].filePath
+            searchSpace[maxIndex].filePath
         } else null
 
         logger.info("Search finished, took ${System.currentTimeMillis() - searchStartTime}ms. Found result: $result")
