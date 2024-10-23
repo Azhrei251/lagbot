@@ -34,7 +34,7 @@ abstract class BasePlayCommand(messageEvent: MessageCreateEvent) : BaseCommand(m
 
     private fun playOrLookupSong(songRequest: String) {
         if (songRequest.contains("open.spotify.com")) {
-            Main.scope.launch {
+            Main.mainScope.launch {
                 SpotifyRepository.getSearchTerms(songRequest).run {
                     forEach {
                         AudioUtil.playSong(event.server.get(), it, event.channel, playTime) {

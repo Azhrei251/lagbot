@@ -17,6 +17,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import dev.lavalink.youtube.YoutubeAudioSourceManager
 import dev.lavalink.youtube.clients.Web
+import kotlinx.coroutines.CoroutineScope
 import org.javacord.api.audio.AudioConnection
 import org.javacord.api.entity.channel.TextChannel
 import org.javacord.api.entity.server.Server
@@ -42,7 +43,11 @@ object AudioUtil {
             registerSourceManager(SoundCloudAudioSourceManager.Builder().build())
         }
     }
-    private val localTrackChecker = LocalTrackChecker()
+    private lateinit var localTrackChecker: LocalTrackChecker
+
+    fun setup(scope: CoroutineScope) {
+        localTrackChecker = LocalTrackChecker(scope)
+    }
 
     fun connect(server: Server, audioConnection: AudioConnection) {
         val player = playerMap[server.id] ?: playerManager.createPlayer().apply {
@@ -97,7 +102,7 @@ object AudioUtil {
 
         playerManager.loadItem(identifierToUse, object : AudioLoadResultHandler {
             override fun trackLoaded(track: AudioTrack) {
-                addIndividualTrack(track, playTime, scheduler)
+                onTrackAdded(addIndividualTrack(track, playTime, scheduler))
             }
 
             override fun playlistLoaded(playlist: AudioPlaylist) {

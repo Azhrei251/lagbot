@@ -29,7 +29,7 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
         }
 
     private fun getTrackQueueInfo(audioTrack: AudioTrack, position: Int = queue.size) =
-        "Added ${audioTrack.info.title} to queue at position $position"
+        "Added ${audioTrack.info.title} - ${audioTrack.info.author} to queue at position $position"
 
     fun playImmediate(audioTrack: AudioTrack): String? {
         player.playTrack(audioTrack)
@@ -157,7 +157,7 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
     }
 
     override fun onTrackStart(player: AudioPlayer, track: AudioTrack) {
-        textChannel.sendMessage("Playing: ${track.info?.title}")
+        textChannel.sendMessage("Playing: ${track.info?.title} - ${track.info?.author}")
     }
 
     override fun onTrackEnd(player: AudioPlayer, track: AudioTrack, endReason: AudioTrackEndReason) {

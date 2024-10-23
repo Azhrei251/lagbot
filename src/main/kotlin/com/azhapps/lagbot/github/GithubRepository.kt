@@ -1,6 +1,6 @@
 package com.azhapps.lagbot.github
 
-import com.azhapps.lagbot.Main.scope
+import com.azhapps.lagbot.Main.mainScope
 import com.azhapps.lagbot.github.model.CreateIssueRequest
 import com.azhapps.lagbot.utils.NetworkUtils
 import com.azhapps.lagbot.utils.PropertiesUtil
@@ -29,7 +29,7 @@ object GithubRepository {
     private val githubDataSource = retrofit.create(GithubDataSource::class.java)
 
     fun createIssue(title: String, body: String, sendResponse: (String) -> Unit) {
-        scope.launch {
+        mainScope.launch {
             val response = githubDataSource.createIssue(CreateIssueRequest(title, body))
             if (response.isSuccessful) {
                 response.body()?.let {
