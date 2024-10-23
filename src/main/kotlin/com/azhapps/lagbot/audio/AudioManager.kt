@@ -24,8 +24,10 @@ import org.javacord.api.entity.server.Server
 import org.slf4j.LoggerFactory
 import java.util.*
 
-object AudioUtil {
-    private val logger = LoggerFactory.getLogger(AudioUtil::class.java)
+class AudioManager(
+    ioScope: CoroutineScope,
+) {
+    private val logger = LoggerFactory.getLogger(AudioManager::class.java)
     private val playerMap = mutableMapOf<Long, AudioPlayer>()
     private val schedulerMap = mutableMapOf<Long, TrackScheduler>()
     private val connectionMap = mutableMapOf<Long, AudioConnection>()
@@ -43,11 +45,7 @@ object AudioUtil {
             registerSourceManager(SoundCloudAudioSourceManager.Builder().build())
         }
     }
-    private lateinit var localTrackChecker: LocalTrackChecker
-
-    fun setup(scope: CoroutineScope) {
-        localTrackChecker = LocalTrackChecker(scope)
-    }
+    private val localTrackChecker: LocalTrackChecker = LocalTrackChecker(ioScope)
 
     fun connect(server: Server, audioConnection: AudioConnection) {
         val player = playerMap[server.id] ?: playerManager.createPlayer().apply {
@@ -81,7 +79,7 @@ object AudioUtil {
         onTrackAdded: (String) -> Unit,
     ) {
         val player = playerMap[server.id]!!
-        val scheduler = schedulerMap[server.id] ?: TrackScheduler(player, textChannel).apply {
+        val scheduler = schedulerMap[server.id] ?: TrackScheduler(player, textChannel, this).apply {
             schedulerMap[server.id] = this
             player.addListener(this)
         }
@@ -141,7 +139,4 @@ object AudioUtil {
 
     fun getScheduler(server: Server) = schedulerMap[server.id]
 
-    enum class PlayTime {
-        QUEUED, IMMEDIATE, NEXT
-    }
 }

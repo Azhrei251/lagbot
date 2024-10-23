@@ -10,6 +10,7 @@ import org.javacord.api.event.message.MessageCreateEvent
 
 abstract class BasePlayCommand(
     messageEvent: MessageCreateEvent,
+    private val audioManager: AudioManager,
     private val scope: CoroutineScope,
     private val spotifyRepository: SpotifyRepository = SpotifyRepository(),
 ) : BaseCommand(messageEvent) {
@@ -25,7 +26,7 @@ abstract class BasePlayCommand(
                 playOrLookupSong(songRequest)
             } else {
                 event.messageAuthor.connectedVoiceChannel.get().connect().thenAccept {
-                    AudioManager.connect(event.server.get(), it)
+                    audioManager.connect(event.server.get(), it)
                     playOrLookupSong(songRequest)
                 }.whenComplete { _, t ->
                     t.printStackTrace()
@@ -40,10 +41,11 @@ abstract class BasePlayCommand(
 
     private fun playOrLookupSong(songRequest: String) {
         if (songRequest.contains("open.spotify.com")) {
+            // TODO - Refactor scope/spotify repository
             scope.launch {
                 spotifyRepository.getSearchTerms(songRequest).run {
                     forEach {
-                        AudioManager.playSong(event.server.get(), it, event.channel, playTime) {
+                        audioManager.playSong(event.server.get(), it, event.channel, playTime) {
                             //Do nothing
                         }
                     }
@@ -51,7 +53,7 @@ abstract class BasePlayCommand(
                 }
             }
         } else {
-            AudioManager.playSong(event.server.get(), songRequest, event.channel, playTime) {
+            audioManager.playSong(event.server.get(), songRequest, event.channel, playTime) {
                 event.channel.sendMessage(it)
             }
         }

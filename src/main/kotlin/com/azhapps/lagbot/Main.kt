@@ -1,6 +1,6 @@
 package com.azhapps.lagbot
 
-import com.azhapps.lagbot.audio.AudioUtil
+import com.azhapps.lagbot.audio.AudioManager
 import com.azhapps.lagbot.commands.Commands
 import com.azhapps.lagbot.github.GithubRepository
 import com.azhapps.lagbot.utils.PropertiesUtil
@@ -23,8 +23,8 @@ object Main {
         CoroutineScope(Dispatchers.IO)
     }
     private val githubRepository = GithubRepository(mainScope)
-    private val commands = Commands(mainScope, githubRepository)
-
+    private val audioManager = AudioManager(ioScope)
+    private val commands = Commands(mainScope, githubRepository, audioManager)
     private val logger = LoggerFactory.getLogger(Main::class.java)
 
     fun isConnectedToVoice(event: MessageEvent) = event.server.get().getConnectedVoiceChannel(api.yourself).isPresent
@@ -42,14 +42,12 @@ object Main {
         api.yourself.connectedVoiceChannels.forEach { serverVoiceChannel ->
             logger.info("Reconnecting to channel in ${serverVoiceChannel.server.name}")
             serverVoiceChannel.connect().thenAccept {
-                AudioUtil.connect(serverVoiceChannel.server, it)
+                audioManager.connect(serverVoiceChannel.server, it)
             }
         }
 
         api.addMessageCreateListener {
             commands.handle(it)
         }
-
-        AudioUtil.setup(ioScope)
     }
 }

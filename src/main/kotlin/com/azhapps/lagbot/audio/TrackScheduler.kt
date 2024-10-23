@@ -11,7 +11,11 @@ import org.javacord.api.entity.channel.TextChannel
 
 private const val MAX_MESSAGE_SIZE = 1750
 
-class TrackScheduler(private val player: AudioPlayer, private val textChannel: TextChannel) : AudioEventAdapter() {
+class TrackScheduler(
+    private val player: AudioPlayer,
+    private val textChannel: TextChannel,
+    private val audioManager: AudioManager, // TODO Consider lambdas instead of whole object reference
+) : AudioEventAdapter() {
 
     private val queue: ArrayDeque<AudioTrack> = ArrayDeque()
     private val loopQueue: ArrayDeque<AudioTrack> = ArrayDeque()
@@ -53,7 +57,7 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
                 })
                 player.playTrack(queue.removeFirst())
             } else {
-                AudioUtil.setupTimeout(textChannel.asServerTextChannel().get().server)
+                audioManager.setupTimeout(textChannel.asServerTextChannel().get().server)
             }
         }
     }
@@ -147,7 +151,7 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
     }
 
     override fun onPlayerPause(player: AudioPlayer) {
-        AudioUtil.setupTimeout(textChannel.asServerTextChannel().get().server)
+        audioManager.setupTimeout(textChannel.asServerTextChannel().get().server)
     }
 
     override fun onPlayerResume(player: AudioPlayer) {
@@ -164,7 +168,7 @@ class TrackScheduler(private val player: AudioPlayer, private val textChannel: T
         if (endReason.mayStartNext) {
             playNextInQueue()
         } else {
-            AudioUtil.setupTimeout(textChannel.asServerTextChannel().get().server)
+            audioManager.setupTimeout(textChannel.asServerTextChannel().get().server)
         }
 
         // endReason == FINISHED: A track finished or died by an exception (mayStartNext = true).

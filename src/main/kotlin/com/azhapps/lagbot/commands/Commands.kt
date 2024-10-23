@@ -1,5 +1,6 @@
 package com.azhapps.lagbot.commands
 
+import com.azhapps.lagbot.audio.AudioManager
 import com.azhapps.lagbot.github.GithubRepository
 import kotlinx.coroutines.CoroutineScope
 import org.javacord.api.event.message.MessageCreateEvent
@@ -9,36 +10,37 @@ private const val PREFIX = "!"
 class Commands(
     private val scope: CoroutineScope,
     private val githubRepository: GithubRepository,
+    private val audioManager: AudioManager,
 ) {
 
     fun handle(messageEvent: MessageCreateEvent) {
         get(messageEvent.messageContent)?.let { info ->
             when (info) {
-                Info.PLAY -> PlayCommand(messageEvent, scope).execute()
+                Info.PLAY -> PlayCommand(messageEvent, audioManager, scope).execute()
 
-                Info.PLAY_NEXT -> PlayNextCommand(messageEvent, scope).execute()
+                Info.PLAY_NEXT -> PlayNextCommand(messageEvent, audioManager, scope).execute()
 
-                Info.PLAY_NOW -> PlayNowCommand(messageEvent, scope).execute()
+                Info.PLAY_NOW -> PlayNowCommand(messageEvent, audioManager, scope).execute()
 
                 Info.HELP -> HelpCommand(messageEvent).execute()
 
-                Info.SKIP -> SkipCommand(messageEvent).execute()
+                Info.SKIP -> SkipCommand(audioManager, messageEvent).execute()
 
-                Info.QUEUE -> QueueCommand(messageEvent).execute()
+                Info.QUEUE -> QueueCommand(audioManager, messageEvent).execute()
 
-                Info.CLEAR -> ClearCommand(messageEvent).execute()
+                Info.CLEAR -> ClearCommand(audioManager, messageEvent).execute()
 
-                Info.RESUME -> ResumeCommand(messageEvent).execute()
+                Info.RESUME -> ResumeCommand(audioManager, messageEvent).execute()
 
-                Info.PAUSE -> PauseCommand(messageEvent).execute()
+                Info.PAUSE -> PauseCommand(audioManager, messageEvent).execute()
 
-                Info.STOP -> StopCommand(messageEvent).execute()
+                Info.STOP -> StopCommand(audioManager, messageEvent).execute()
 
-                Info.REMOVE -> RemoveCommand(messageEvent).execute()
+                Info.REMOVE -> RemoveCommand(audioManager, messageEvent).execute()
 
-                Info.LOOP -> LoopCommand(messageEvent).execute()
+                Info.LOOP -> LoopCommand(audioManager, messageEvent).execute()
 
-                Info.STOP_LOOP -> LoopStopCommand(messageEvent).execute()
+                Info.STOP_LOOP -> LoopStopCommand(audioManager, messageEvent).execute()
 
                 Info.ISSUE -> CreateIssueCommand(messageEvent, githubRepository).execute()
             }
