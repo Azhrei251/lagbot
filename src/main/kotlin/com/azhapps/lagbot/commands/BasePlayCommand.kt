@@ -1,7 +1,8 @@
 package com.azhapps.lagbot.commands
 
 import com.azhapps.lagbot.Main
-import com.azhapps.lagbot.audio.AudioUtil
+import com.azhapps.lagbot.audio.AudioManager
+import com.azhapps.lagbot.audio.PlayTime
 import com.azhapps.lagbot.spotify.SpotifyRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -10,9 +11,10 @@ import org.javacord.api.event.message.MessageCreateEvent
 abstract class BasePlayCommand(
     messageEvent: MessageCreateEvent,
     private val scope: CoroutineScope,
+    private val spotifyRepository: SpotifyRepository = SpotifyRepository(),
 ) : BaseCommand(messageEvent) {
 
-    abstract val playTime: AudioUtil.PlayTime
+    abstract val playTime: PlayTime
 
     override fun execute() {
         val botInVoice = Main.isConnectedToVoice(event)
@@ -23,7 +25,7 @@ abstract class BasePlayCommand(
                 playOrLookupSong(songRequest)
             } else {
                 event.messageAuthor.connectedVoiceChannel.get().connect().thenAccept {
-                    AudioUtil.connect(event.server.get(), it)
+                    AudioManager.connect(event.server.get(), it)
                     playOrLookupSong(songRequest)
                 }.whenComplete { _, t ->
                     t.printStackTrace()
@@ -39,9 +41,9 @@ abstract class BasePlayCommand(
     private fun playOrLookupSong(songRequest: String) {
         if (songRequest.contains("open.spotify.com")) {
             scope.launch {
-                SpotifyRepository.getSearchTerms(songRequest).run {
+                spotifyRepository.getSearchTerms(songRequest).run {
                     forEach {
-                        AudioUtil.playSong(event.server.get(), it, event.channel, playTime) {
+                        AudioManager.playSong(event.server.get(), it, event.channel, playTime) {
                             //Do nothing
                         }
                     }
@@ -49,7 +51,7 @@ abstract class BasePlayCommand(
                 }
             }
         } else {
-            AudioUtil.playSong(event.server.get(), songRequest, event.channel, playTime) {
+            AudioManager.playSong(event.server.get(), songRequest, event.channel, playTime) {
                 event.channel.sendMessage(it)
             }
         }

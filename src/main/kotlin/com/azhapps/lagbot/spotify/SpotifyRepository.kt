@@ -4,14 +4,20 @@ import com.azhapps.lagbot.spotify.model.AuthToken
 import com.azhapps.lagbot.utils.NetworkUtils
 import com.azhapps.lagbot.utils.PropertiesUtil
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.util.*
 
-object SpotifyRepository {
 
-    private const val SPOTIFY_API_BASE_URL = "https://api.spotify.com/v1/"
-    private const val SPOTIFY_AUTH_BASE_URL = "https://accounts.spotify.com/"
-    private const val EXPIRY_OFFSET = 60000L
+private const val SPOTIFY_API_BASE_URL = "https://api.spotify.com/v1/"
+private const val SPOTIFY_AUTH_BASE_URL = "https://accounts.spotify.com/"
+private const val EXPIRY_OFFSET = 60000L
+
+class SpotifyRepository(
+    loggingInterceptor: HttpLoggingInterceptor = NetworkUtils.loggingInterceptor,
+    converterFactory: GsonConverterFactory = NetworkUtils.converterFactory,
+) {
 
     private var authToken: AuthToken? = null
     private var tokenExpiryTime: Long = 0
@@ -28,10 +34,10 @@ object SpotifyRepository {
                             .build()
                     )
                 }
-                .addInterceptor(NetworkUtils.loggingInterceptor)
+                .addInterceptor(loggingInterceptor)
                 .build()
         )
-        .addConverterFactory(NetworkUtils.converterFactory)
+        .addConverterFactory(converterFactory)
         .build()
     private val authService = authRetrofit.create(SpotifyAuthDataSource::class.java)
 
@@ -39,7 +45,7 @@ object SpotifyRepository {
         .baseUrl(SPOTIFY_API_BASE_URL)
         .client(
             OkHttpClient.Builder()
-                .addInterceptor(NetworkUtils.loggingInterceptor)
+                .addInterceptor(loggingInterceptor)
                 .addInterceptor {
                     it.proceed(
                         it.request()
@@ -50,7 +56,7 @@ object SpotifyRepository {
                 }
                 .build()
         )
-        .addConverterFactory(NetworkUtils.converterFactory)
+        .addConverterFactory(converterFactory)
         .build()
     private val spotifyDataSource = spotifyRetrofit.create(SpotifyDataSource::class.java)
 
@@ -104,7 +110,8 @@ object SpotifyRepository {
             if (tokenResponse.isSuccessful) {
                 tokenResponse.body()?.let {
                     authToken = it
-                    tokenExpiryTime = System.currentTimeMillis() + (authToken?.expiresIn?.times(1000L) ?: 0L) - EXPIRY_OFFSET
+                    tokenExpiryTime =
+                        System.currentTimeMillis() + (authToken?.expiresIn?.times(1000L) ?: 0L) - EXPIRY_OFFSET
                 }
             }
         }
