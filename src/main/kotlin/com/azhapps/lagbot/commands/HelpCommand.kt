@@ -1,13 +1,13 @@
 package com.azhapps.lagbot.commands
 
-import org.javacord.api.event.message.MessageCreateEvent
+import com.azhapps.lagbot.commands.model.CommandContext
 
 @Suppress("UnusedReceiverParameter")
-fun Commands.help(event: MessageCreateEvent) {
+fun Commands.help(commandContext: CommandContext) {
     var messageText = "```"
     Commands.Info.entries.forEach {
         messageText += "${it.helpText}\n"
     }
     messageText += "```"
-    event.channel.sendMessage(messageText)
+    commandContext.onResponse(messageText)
 }

@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import org.javacord.api.DiscordApi
 import org.javacord.api.DiscordApiBuilder
 import org.javacord.api.entity.intent.Intent
+import org.javacord.api.entity.server.Server
 import org.javacord.api.event.message.MessageEvent
 import org.slf4j.LoggerFactory
 
@@ -17,9 +18,7 @@ object Main {
 
     lateinit var api: DiscordApi
 
-    private val ioScope by lazy {
-        CoroutineScope(Dispatchers.IO)
-    }
+    private val ioScope = CoroutineScope(Dispatchers.IO)
     private val githubRepository = GithubRepository(ioScope)
     private val spotifyRepository = SpotifyRepository(ioScope)
     private val audioManager = AudioManager(ioScope)
@@ -30,7 +29,7 @@ object Main {
     )
     private val logger = LoggerFactory.getLogger(Main::class.java)
 
-    fun isConnectedToVoice(event: MessageEvent) = event.server.get().getConnectedVoiceChannel(api.yourself).isPresent
+    fun isConnectedToVoice(server: Server) = server.getConnectedVoiceChannel(api.yourself).isPresent
 
     @JvmStatic
     fun main(args: Array<String>) {

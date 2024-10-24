@@ -2,6 +2,7 @@ package com.azhapps.lagbot.commands
 
 import com.azhapps.lagbot.audio.AudioManager
 import com.azhapps.lagbot.audio.PlayTime
+import com.azhapps.lagbot.commands.model.CommandContext
 import com.azhapps.lagbot.github.GithubRepository
 import com.azhapps.lagbot.spotify.SpotifyRepository
 import org.javacord.api.event.message.MessageCreateEvent
@@ -16,34 +17,63 @@ class Commands(
 
     fun handle(messageEvent: MessageCreateEvent) {
         get(messageEvent.messageContent)?.let { info ->
+            val context = CommandContext(
+                onResponse = { messageEvent.channel.sendMessage(it) },
+                scheduler = audioManager.getScheduler(messageEvent.server.get()),
+                arguments = messageEvent.messageContent.substringAfter(' ')
+            )
             when (info) {
-                Info.PLAY -> play(messageEvent, PlayTime.QUEUED)
+                Info.PLAY -> play(
+                    context = context,
+                    playTime = PlayTime.QUEUED,
+                    server = messageEvent.server.get(),
+                    textChannel = messageEvent.channel,
+                    voiceChannel = messageEvent.messageAuthor.connectedVoiceChannel,
+                    requesterInVoice = messageEvent.messageAuthor.connectedVoiceChannel.isPresent
+                )
 
-                Info.PLAY_NEXT -> play(messageEvent, PlayTime.NEXT)
+                Info.PLAY_NEXT -> play(
+                    context = context,
+                    playTime = PlayTime.NEXT,
+                    server = messageEvent.server.get(),
+                    textChannel = messageEvent.channel,
+                    voiceChannel = messageEvent.messageAuthor.connectedVoiceChannel,
+                    requesterInVoice = messageEvent.messageAuthor.connectedVoiceChannel.isPresent
+                )
 
-                Info.PLAY_NOW -> play(messageEvent, PlayTime.IMMEDIATE)
+                Info.PLAY_NOW -> play(
+                    context = context,
+                    playTime = PlayTime.IMMEDIATE,
+                    server = messageEvent.server.get(),
+                    textChannel = messageEvent.channel,
+                    voiceChannel = messageEvent.messageAuthor.connectedVoiceChannel,
+                    requesterInVoice = messageEvent.messageAuthor.connectedVoiceChannel.isPresent
+                )
 
-                Info.HELP -> help(messageEvent)
+                Info.HELP -> help(context)
 
-                Info.SKIP -> skip(messageEvent)
+                Info.SKIP -> skip(context)
 
-                Info.QUEUE -> queue(messageEvent)
+                Info.QUEUE -> queue(context)
 
-                Info.CLEAR -> clear(messageEvent)
+                Info.CLEAR -> clear(context)
 
-                Info.RESUME -> resume(messageEvent)
+                Info.RESUME -> resume(context)
 
-                Info.PAUSE -> pause(messageEvent)
+                Info.PAUSE -> pause(context)
 
-                Info.STOP -> stop(messageEvent)
+                Info.STOP -> stop(context)
 
-                Info.REMOVE -> remove(messageEvent)
+                Info.REMOVE -> remove(context)
 
-                Info.LOOP -> loop(messageEvent)
+                Info.LOOP -> loop(context)
 
-                Info.STOP_LOOP -> loopStop(messageEvent)
+                Info.STOP_LOOP -> loopStop(context)
 
-                Info.ISSUE -> createIssue(messageEvent)
+                Info.ISSUE -> createIssue(
+                    context,
+                    "${messageEvent.messageAuthor.discriminatedName} | ${messageEvent.messageAuthor.displayName}"
+                )
             }
         }
     }

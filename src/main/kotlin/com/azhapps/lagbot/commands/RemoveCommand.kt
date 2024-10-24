@@ -1,16 +1,16 @@
 package com.azhapps.lagbot.commands
 
-import org.javacord.api.event.message.MessageCreateEvent
+import com.azhapps.lagbot.commands.model.CommandContext
 
 private const val FIRST = "first"
 private const val LAST = "last"
 
-fun Commands.remove(event: MessageCreateEvent) {
-    val scheduler = audioManager.getScheduler(event.server.get())
+fun Commands.remove(context: CommandContext) {
+    val scheduler = context.scheduler
     if (scheduler == null) {
-        event.channel.sendMessage("Nothing in queue!")
+        context.onResponse("Nothing in queue!")
     } else {
-        val indexToRemove = when (val requestedRemove = event.messageContent.substringAfter(' ').lowercase()) {
+        val indexToRemove = when (val requestedRemove = context.arguments.lowercase()) {
             FIRST -> 1
 
             LAST -> scheduler.queueSize()
@@ -18,7 +18,7 @@ fun Commands.remove(event: MessageCreateEvent) {
             else -> try {
                 requestedRemove.toInt()
             } catch (e: NumberFormatException) {
-                event.channel.sendMessage("Invalid command")
+                context.onResponse("Invalid command")
                 -1
             }
         }
@@ -26,9 +26,9 @@ fun Commands.remove(event: MessageCreateEvent) {
         if (indexToRemove != -1) {
             val removed = scheduler.remove(indexToRemove - 1)
             if (removed) {
-                event.channel.sendMessage("Removed song at position $indexToRemove")
+                context.onResponse("Removed song at position $indexToRemove")
             } else {
-                event.channel.sendMessage("No song in queue at position $indexToRemove")
+                context.onResponse("No song in queue at position $indexToRemove")
             }
         }
     }

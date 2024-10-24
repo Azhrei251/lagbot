@@ -1,13 +1,13 @@
 package com.azhapps.lagbot.commands
 
-import org.javacord.api.event.message.MessageCreateEvent
+import com.azhapps.lagbot.commands.model.CommandContext
 
-fun Commands.clear(event: MessageCreateEvent) {
-    val scheduler = audioManager.getScheduler(event.server.get())
+fun Commands.clear(context: CommandContext) {
+    val scheduler = context.scheduler
     if (scheduler == null) {
-        event.channel.sendMessage("No songs in queue!")
+        context.onResponse("No songs in queue!")
     } else {
-        event.channel.sendMessage("Cleared queue")
+        context.onResponse("Cleared queue")
         scheduler.clear()
     }
 }

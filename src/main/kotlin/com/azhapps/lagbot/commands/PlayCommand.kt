@@ -2,43 +2,59 @@ package com.azhapps.lagbot.commands
 
 import com.azhapps.lagbot.Main
 import com.azhapps.lagbot.audio.PlayTime
+import com.azhapps.lagbot.commands.model.CommandContext
+import org.javacord.api.entity.channel.ServerVoiceChannel
+import org.javacord.api.entity.channel.TextChannel
+import org.javacord.api.entity.server.Server
 import org.javacord.api.event.message.MessageCreateEvent
+import java.util.*
 
-fun Commands.play(event: MessageCreateEvent, playTime: PlayTime) {
-    val botInVoice = Main.isConnectedToVoice(event)
-    val requesterInVoice = event.messageAuthor.connectedVoiceChannel.isPresent
+fun Commands.play(
+    context: CommandContext,
+    server: Server,
+    voiceChannel: Optional<ServerVoiceChannel>,
+    textChannel: TextChannel,
+    requesterInVoice: Boolean,
+    playTime: PlayTime
+) {
+    val botInVoice = Main.isConnectedToVoice(server)
     if (requesterInVoice) {
-        val songRequest = event.messageContent.substringAfter(' ').substringBefore("?playlist")
+        val songRequest = context.arguments.substringBefore("?playlist")
         if (botInVoice) {
-            playOrLookupSong(event, playTime, songRequest)
+            playOrLookupSong(context, server, textChannel, playTime, songRequest)
         } else {
-            event.messageAuthor.connectedVoiceChannel.get().connect().thenAccept {
-                audioManager.connect(event.server.get(), it)
-                playOrLookupSong(event, playTime, songRequest)
+            voiceChannel.get().connect().thenAccept {
+                audioManager.connect(server, it)
+                playOrLookupSong(context, server, textChannel, playTime, songRequest)
             }.whenComplete { _, t ->
                 t.printStackTrace()
-                event.channel.sendMessage("Something went wrong:\n${t.message}")
+                context.onResponse("Something went wrong:\n${t.message}")
             }
         }
-
     } else {
-        event.channel.sendMessage("Join a voice channel first!")
+        context.onResponse("Join a voice channel first!")
     }
 }
 
-private fun Commands.playOrLookupSong(event: MessageCreateEvent, playTime: PlayTime, songRequest: String) {
+private fun Commands.playOrLookupSong(
+    context: CommandContext,
+    server: Server,
+    textChannel: TextChannel,
+    playTime: PlayTime,
+    songRequest: String
+) {
     if (songRequest.contains("open.spotify.com")) {
         spotifyRepository.getSearchTerms(songRequest) { spotifyResults ->
             spotifyResults.forEach {
-                audioManager.playSong(event.server.get(), it, event.channel, playTime) {
+                audioManager.playSong(server, it, textChannel, playTime) {
                     //Do nothing
                 }
             }
-            event.channel.sendMessage("${spotifyResults.size} tracks added to queue")
+            context.onResponse("${spotifyResults.size} tracks added to queue")
         }
     } else {
-        audioManager.playSong(event.server.get(), songRequest, event.channel, playTime) {
-            event.channel.sendMessage(it)
+        audioManager.playSong(server, songRequest, textChannel, playTime) {
+            context.onResponse(it)
         }
     }
 }
