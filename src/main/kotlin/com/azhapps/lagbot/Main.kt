@@ -1,10 +1,12 @@
 package com.azhapps.lagbot
 
-import com.azhapps.lagbot.audio.AudioUtil
+import com.azhapps.lagbot.audio.AudioManager
 import com.azhapps.lagbot.commands.Commands
+import com.azhapps.lagbot.github.GithubRepository
+import com.azhapps.lagbot.spotify.SpotifyRepository
 import com.azhapps.lagbot.utils.PropertiesUtil
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.newFixedThreadPoolContext
+import kotlinx.coroutines.Dispatchers
 import org.javacord.api.DiscordApi
 import org.javacord.api.DiscordApiBuilder
 import org.javacord.api.entity.intent.Intent
@@ -15,10 +17,17 @@ object Main {
 
     lateinit var api: DiscordApi
 
-    val scope by lazy {
-        CoroutineScope(newFixedThreadPoolContext(4, "API"))
+    private val ioScope by lazy {
+        CoroutineScope(Dispatchers.IO)
     }
-
+    private val githubRepository = GithubRepository(ioScope)
+    private val spotifyRepository = SpotifyRepository(ioScope)
+    private val audioManager = AudioManager(ioScope)
+    private val commands = Commands(
+        githubRepository = githubRepository,
+        spotifyRepository = spotifyRepository,
+        audioManager = audioManager
+    )
     private val logger = LoggerFactory.getLogger(Main::class.java)
 
     fun isConnectedToVoice(event: MessageEvent) = event.server.get().getConnectedVoiceChannel(api.yourself).isPresent
@@ -36,12 +45,12 @@ object Main {
         api.yourself.connectedVoiceChannels.forEach { serverVoiceChannel ->
             logger.info("Reconnecting to channel in ${serverVoiceChannel.server.name}")
             serverVoiceChannel.connect().thenAccept {
-                AudioUtil.connect(serverVoiceChannel.server, it)
+                audioManager.connect(serverVoiceChannel.server, it)
             }
         }
 
         api.addMessageCreateListener {
-            Commands.handle(it)
+            commands.handle(it)
         }
     }
 }

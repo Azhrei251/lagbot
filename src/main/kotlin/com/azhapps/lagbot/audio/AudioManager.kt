@@ -1,12 +1,14 @@
 package com.azhapps.lagbot.audio
 
 import com.azhapps.lagbot.Main
+import com.azhapps.lagbot.local.LocalTrackChecker
 import com.azhapps.lagbot.utils.Patterns
 import com.azhapps.lagbot.utils.PropertiesUtil
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.local.LocalAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager
@@ -15,14 +17,17 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import dev.lavalink.youtube.YoutubeAudioSourceManager
 import dev.lavalink.youtube.clients.Web
+import kotlinx.coroutines.CoroutineScope
 import org.javacord.api.audio.AudioConnection
 import org.javacord.api.entity.channel.TextChannel
 import org.javacord.api.entity.server.Server
 import org.slf4j.LoggerFactory
 import java.util.*
 
-object AudioUtil {
-    private val logger = LoggerFactory.getLogger(AudioUtil::class.java)
+class AudioManager(
+    scope: CoroutineScope,
+) {
+    private val logger = LoggerFactory.getLogger(AudioManager::class.java)
     private val playerMap = mutableMapOf<Long, AudioPlayer>()
     private val schedulerMap = mutableMapOf<Long, TrackScheduler>()
     private val connectionMap = mutableMapOf<Long, AudioConnection>()
@@ -32,6 +37,7 @@ object AudioUtil {
             PropertiesUtil.get(PropertiesUtil.VISITOR_DATA)
         )
         DefaultAudioPlayerManager().apply {
+            registerSourceManager(LocalAudioSourceManager())
             registerSourceManager(YoutubeAudioSourceManager())
             registerSourceManager(BandcampAudioSourceManager())
             registerSourceManager(VimeoAudioSourceManager())
@@ -39,6 +45,7 @@ object AudioUtil {
             registerSourceManager(SoundCloudAudioSourceManager.Builder().build())
         }
     }
+    private val localTrackChecker: LocalTrackChecker = LocalTrackChecker(scope)
 
     fun connect(server: Server, audioConnection: AudioConnection) {
         val player = playerMap[server.id] ?: playerManager.createPlayer().apply {
@@ -72,27 +79,32 @@ object AudioUtil {
         onTrackAdded: (String) -> Unit,
     ) {
         val player = playerMap[server.id]!!
-        val scheduler = schedulerMap[server.id] ?: TrackScheduler(player, textChannel).apply {
+        val scheduler = schedulerMap[server.id] ?: TrackScheduler(player, textChannel, this).apply {
             schedulerMap[server.id] = this
             player.addListener(this)
         }
 
-        //If we've got a valid URL, try to load it. Otherwise, do a youtube search
+        //If we've got a valid URL, try to load it. Otherwise, do a YouTube search
         var isSearch = false
         val identifierToUse = if (Patterns.WEB_URL.matcher(identifier).matches()) {
             identifier
         } else {
-            isSearch = true
-            "ytsearch:${identifier}"
+            val localFilePath = localTrackChecker.fuzzyLocalSearch(identifier)
+            if (localFilePath != null) {
+                localFilePath
+            } else {
+                isSearch = true
+                "ytsearch:${identifier}"
+            }
         }
 
         playerManager.loadItem(identifierToUse, object : AudioLoadResultHandler {
             override fun trackLoaded(track: AudioTrack) {
-                addIndividualTrack(track, playTime, scheduler)
+                onTrackAdded(addIndividualTrack(track, playTime, scheduler))
             }
 
             override fun playlistLoaded(playlist: AudioPlaylist) {
-                //Search results are returned as a playlist oddly. Only add the first. Otherwise add the whole playlist
+                //Search results are returned as a playlist oddly. Only add the first. Otherwise, add the whole playlist
                 if (isSearch) {
                     onTrackAdded(addIndividualTrack(playlist.tracks.first(), playTime, scheduler))
 
@@ -127,7 +139,4 @@ object AudioUtil {
 
     fun getScheduler(server: Server) = schedulerMap[server.id]
 
-    enum class PlayTime {
-        QUEUED, IMMEDIATE, NEXT
-    }
 }

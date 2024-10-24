@@ -1,41 +1,49 @@
 package com.azhapps.lagbot.commands
 
+import com.azhapps.lagbot.audio.AudioManager
+import com.azhapps.lagbot.audio.PlayTime
+import com.azhapps.lagbot.github.GithubRepository
+import com.azhapps.lagbot.spotify.SpotifyRepository
 import org.javacord.api.event.message.MessageCreateEvent
 
-object Commands {
+private const val PREFIX = "!"
 
-    private const val PREFIX = "!"
+class Commands(
+    internal val audioManager: AudioManager,
+    internal val githubRepository: GithubRepository,
+    internal val spotifyRepository: SpotifyRepository,
+) {
 
     fun handle(messageEvent: MessageCreateEvent) {
         get(messageEvent.messageContent)?.let { info ->
             when (info) {
-                Info.PLAY -> PlayCommand(messageEvent).execute()
+                Info.PLAY -> play(messageEvent, PlayTime.QUEUED)
 
-                Info.PLAY_NEXT -> PlayNextCommand(messageEvent).execute()
+                Info.PLAY_NEXT -> play(messageEvent, PlayTime.NEXT)
 
-                Info.PLAY_NOW -> PlayNowCommand(messageEvent).execute()
+                Info.PLAY_NOW -> play(messageEvent, PlayTime.IMMEDIATE)
 
-                Info.HELP -> HelpCommand(messageEvent).execute()
+                Info.HELP -> help(messageEvent)
 
-                Info.SKIP -> SkipCommand(messageEvent).execute()
+                Info.SKIP -> skip(messageEvent)
 
-                Info.QUEUE -> QueueCommand(messageEvent).execute()
+                Info.QUEUE -> queue(messageEvent)
 
-                Info.CLEAR -> ClearCommand(messageEvent).execute()
+                Info.CLEAR -> clear(messageEvent)
 
-                Info.RESUME -> ResumeCommand(messageEvent).execute()
+                Info.RESUME -> resume(messageEvent)
 
-                Info.PAUSE -> PauseCommand(messageEvent).execute()
+                Info.PAUSE -> pause(messageEvent)
 
-                Info.STOP -> StopCommand(messageEvent).execute()
+                Info.STOP -> stop(messageEvent)
 
-                Info.REMOVE -> RemoveCommand(messageEvent).execute()
+                Info.REMOVE -> remove(messageEvent)
 
-                Info.LOOP -> LoopCommand(messageEvent).execute()
+                Info.LOOP -> loop(messageEvent)
 
-                Info.STOP_LOOP -> LoopStopCommand(messageEvent).execute()
+                Info.STOP_LOOP -> loopStop(messageEvent)
 
-                Info.ISSUE -> CreateIssueCommand(messageEvent).execute()
+                Info.ISSUE -> createIssue(messageEvent)
             }
         }
     }
@@ -43,7 +51,7 @@ object Commands {
     private fun get(string: String): Info? {
         val matchString = string.substringBefore(' ')
 
-        return Info.values().firstOrNull { info ->
+        return Info.entries.firstOrNull { info ->
             info.keys.any {
                 matchString.equals("$PREFIX${it}", ignoreCase = true)
             }
@@ -53,7 +61,10 @@ object Commands {
     enum class Info(val keys: List<String>, val helpText: String) {
         HELP(listOf("help", "h"), "${PREFIX}help: Provides a list of commands and their uses"),
         PLAY(listOf("play", "p"), "${PREFIX}play {identifier}: Adds the requested song to the end of the queue"),
-        PLAY_NEXT(listOf("playnext", "pn"), "${PREFIX}playnext {identifier}: Adds the requested song to the front of the queue"),
+        PLAY_NEXT(
+            listOf("playnext", "pn"),
+            "${PREFIX}playnext {identifier}: Adds the requested song to the front of the queue"
+        ),
         PLAY_NOW(listOf("playnow"), "${PREFIX}playnow {identifier}: Immediately plays the requested song"),
         STOP(listOf("stop", "s"), "${PREFIX}stop: Stops the music playback and clears the queue"),
         PAUSE(listOf("pause", "p"), "${PREFIX}pause: Pauses the music playback"),
