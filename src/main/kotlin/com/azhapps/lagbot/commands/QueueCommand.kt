@@ -1,12 +1,11 @@
 package com.azhapps.lagbot.commands
 
-import org.javacord.api.event.message.MessageCreateEvent
+import com.azhapps.lagbot.commands.model.CommandContext
 
-fun Commands.queue(event: MessageCreateEvent) {
-    val scheduler = audioManager.getScheduler(event.server.get())
-    if (scheduler == null) {
-        event.channel.sendMessage("No songs in queue!")
+fun Commands.queue(context: CommandContext) {
+    if (context.scheduler == null) {
+        context.onResponse("No songs in queue!")
     } else {
-        scheduler.printQueue()
+        context.scheduler.printQueue()
     }
 }

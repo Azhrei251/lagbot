@@ -1,17 +1,17 @@
 package com.azhapps.lagbot.commands
 
-import org.javacord.api.event.message.MessageCreateEvent
+import com.azhapps.lagbot.commands.model.CommandContext
 
-fun Commands.loop(event: MessageCreateEvent) {
-    val scheduler = audioManager.getScheduler(event.server.get())
+fun Commands.loop(context: CommandContext) {
+    val scheduler = context.scheduler
     if (scheduler == null) {
-        event.channel.sendMessage("Nothing in queue!")
+        context.onResponse("Nothing in queue!")
     } else {
         val looped = scheduler.loop()
         if (looped == 0) {
-            event.channel.sendMessage("Nothing to loop!")
+            context.onResponse("Nothing to loop!")
         } else {
-            event.channel.sendMessage("Setup loop for $looped songs")
+            context.onResponse("Setup loop for $looped songs")
         }
     }
 }
