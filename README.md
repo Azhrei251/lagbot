@@ -20,6 +20,7 @@ lagbot:
     DEBUG: false
     PO_TOKEN: YOUR_PO_TOKEN_HERE
     VISITOR_DATA: YOUR_VISITOR_DATA_HERE
+    LOCAL_AUDIO_DIR: /audio
     LOCAL_AUDIO_REFRESH_PERIOD: 86400000
   volumes:
     - /path/to/your/audio:/audio
