@@ -1,13 +1,13 @@
 package com.azhapps.lagbot.commands
 
-import org.javacord.api.event.message.MessageCreateEvent
+import com.azhapps.lagbot.commands.model.CommandContext
 
-fun Commands.stop(event: MessageCreateEvent) {
-    val scheduler = audioManager.getScheduler(event.server.get())
+fun Commands.stop(context: CommandContext) {
+    val scheduler = context.scheduler
     if (scheduler == null) {
-        event.channel.sendMessage("Nothing to stop!")
+        context.onResponse("Nothing to stop!")
     } else {
-        event.channel.sendMessage("Stopped")
+        context.onResponse("Stopped")
         scheduler.stop()
     }
 }
