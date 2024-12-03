@@ -27,7 +27,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:2.0.21"
     implementation 'org.javacord:javacord:3.8.0'
     implementation "dev.arbjerg:lavaplayer:2.2.2"
-    implementation "dev.lavalink.youtube:v2:1.8.3"
+    implementation "dev.lavalink.youtube:v2:1.10.2"
     implementation "com.squareup.retrofit2:retrofit:2.11.0"
     implementation "com.squareup.retrofit2:converter-gson:2.11.0"
     implementation "com.squareup.okhttp3:logging-interceptor:4.12.0"
