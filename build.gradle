@@ -24,7 +24,7 @@ kotlin {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:2.0.21"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:2.1.0"
     implementation 'org.javacord:javacord:3.8.0'
     implementation "dev.arbjerg:lavaplayer:2.2.2"
     implementation "dev.lavalink.youtube:v2:1.11.1"
