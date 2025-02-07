@@ -25,7 +25,7 @@ lagbot:
   volumes:
     - /path/to/your/audio:/audio
 restart: unless-stopped
-  ```  
+  ```
 <h4>Codebase commands</h4>
 
 ```gradlew run```: Run the bot locally
