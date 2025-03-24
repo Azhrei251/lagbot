@@ -6,6 +6,6 @@ fun Commands.queue(context: CommandContext) {
     if (context.scheduler == null) {
         context.onResponse("No songs in queue!")
     } else {
-        context.scheduler.printQueue()
+        context.onResponse(context.scheduler.getFormattedQueue())
     }
 }

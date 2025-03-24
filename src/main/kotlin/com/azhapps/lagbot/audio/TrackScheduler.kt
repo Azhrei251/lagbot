@@ -70,7 +70,7 @@ class TrackScheduler(
         }
     }
 
-    fun printQueue() {
+    fun getFormattedQueue(): String {
         var messageText = "```"
         var queueDuration = 0L
         if (player.playingTrack != null) {
@@ -100,9 +100,10 @@ class TrackScheduler(
                 messageText += "\n$excessSongs more songs...\n"
             }
         }
-        messageText += "\nQueue duration: ${Utils.formatTimeStamp(queueDuration)}"
+        messageText += "\nTotal duration: ${Utils.formatTimeStamp(queueDuration)}"
         messageText += "```"
-        textChannel.sendMessage(messageText)
+
+        return messageText
     }
 
     fun pause() {
