@@ -22,6 +22,9 @@ class Commands(
                 scheduler = audioManager.getScheduler(messageEvent.server.get()),
                 arguments = messageEvent.messageContent.substringAfter(' ')
             )
+            // Always update scheduler's text channel to the most recently requeusted channel.
+            context.scheduler?.updateTextChannel(messageEvent.channel)
+
             when (info) {
                 Info.PLAY -> play(
                     context = context,

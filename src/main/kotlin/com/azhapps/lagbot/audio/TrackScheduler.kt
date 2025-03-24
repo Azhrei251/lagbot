@@ -13,7 +13,7 @@ private const val MAX_MESSAGE_SIZE = 1750
 
 class TrackScheduler(
     private val player: AudioPlayer,
-    private val textChannel: TextChannel,
+    private var textChannel: TextChannel,
     private val audioManager: AudioManager, // TODO Consider lambdas instead of whole object reference
 ) : AudioEventAdapter() {
 
@@ -149,6 +149,10 @@ class TrackScheduler(
         if (loopQueue.isNotEmpty()) {
             loopQueue.add(audioTrack)
         }
+    }
+
+    fun updateTextChannel(textChannel: TextChannel) {
+        this.textChannel = textChannel
     }
 
     override fun onPlayerPause(player: AudioPlayer) {
