@@ -1,5 +1,5 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '2.1.21'
+    id 'org.jetbrains.kotlin.jvm' version '2.2.10'
     id "com.github.johnrengelman.shadow" version "8.1.1"
 }
 
@@ -24,7 +24,7 @@ kotlin {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:2.1.21"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:2.2.10"
     implementation 'org.javacord:javacord:3.8.0'
     implementation "dev.arbjerg:lavaplayer:2.2.3"
     implementation "dev.lavalink.youtube:v2:1.13.2"
